@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f7f5">
+  <title>Рыбный магазин</title>
+
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 20px 16px 32px;
+      font-family: Arial, sans-serif;
+      background: var(--tg-theme-bg-color, #f5f7f5);
+      color: var(--tg-theme-text-color, #17251f);
+    }
+
+    .header {
+      padding: 22px 18px;
+      border-radius: 20px;
+      background: #174d3b;
+      color: white;
+      margin-bottom: 22px;
+    }
+
+    .header h1 {
+      font-size: 25px;
+      margin: 0 0 8px;
+    }
+
+    .header p {
+      margin: 0;
+      opacity: 0.85;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    h2 {
+      font-size: 20px;
+      margin: 20px 0 14px;
+    }
+
+    .filters {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      margin-bottom: 16px;
+    }
+
+    .filter {
+      border: none;
+      border-radius: 20px;
+      padding: 10px 16px;
+      white-space: nowrap;
+      background: #e5eee9;
+      color: #174d3b;
+      font-weight: 600;
+    }
+
+    .filter.active {
+      background: #174d3b;
+      color: white;
+    }
+
+    .products {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .card {
+      background: var(--tg-theme-secondary-bg-color, white);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+
+    .photo {
+      height: 115px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 58px;
+      background: #e7f0eb;
+    }
+
+    .info {
+      padding: 12px;
+    }
+
+    .info h3 {
+      margin: 0 0 6px;
+      font-size: 16px;
+    }
+
+    .info p {
+      margin: 0 0 10px;
+      color: var(--tg-theme-hint-color, #78847d);
+      font-size: 12px;
+    }
+
+    .price {
+      color: #176b48;
+      font-weight: bold;
+      font-size: 13px;
+    }
+
+    .section {
+      margin-top: 25px;
+      padding: 17px;
+      background: var(--tg-theme-secondary-bg-color, white);
+      border-radius: 16px;
+    }
+
+    .section p {
+      color: var(--tg-theme-hint-color, #78847d);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 25px;
+      color: var(--tg-theme-hint-color, #78847d);
+      font-size: 12px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header class="header">
+    <h1>🐟 Рыбный магазин</h1>
+    <p>Свежая рыба и морепродукты.
+      Выбирайте то, что любите!</p>
+  </header>
+
+  <h2>Наш ассортимент</h2>
+
+  <div class="filters">
+    <button class="filter active" data-category="all">Всё</button>
+    <button class="filter" data-category="fish">Рыба</button>
+    <button class="filter" data-category="seafood">Морепродукты</button>
+  </div>
+
+  <div class="products" id="products"></div>
+
+  <div class="section">
+    <h2>📍 Наши магазины</h2>
+    <p>Здесь скоро появятся адреса и график работы наших торговых точек.</p>
+  </div>
+
+  <div class="section">
+    <h2>📞 Как заказать</h2>
+    <p>По вопросам наличия и оформления заказа свяжитесь с нашим продавцом.</p>
+  </div>
+
+  <footer>
+    Рыбный магазин · Добро пожаловать!
+  </footer>
+
+  <script>
+    const products = [
+      {
+        name: "Сёмга",
+        category: "fish",
+        emoji: "🐟",
+        description: "Красная рыба"
+      },
+      {
+        name: "Дорадо",
+        category: "fish",
+        emoji: "🐠",
+        description: "Для запекания и гриля"
+      },
+      {
+        name: "Сибас",
+        category: "fish",
+        emoji: "🐟",
+        description: "Нежное мясо"
+      },
+      {
+        name: "Креветки",
+        category: "seafood",
+        emoji: "🦐",
+        description: "Морепродукты"
+      },
+      {
+        name: "Кальмар",
+        category: "seafood",
+        emoji: "🦑",
+        description: "Для горячих блюд"
+      },
+      {
+        name: "Мидии",
+        category: "seafood",
+        emoji: "🐚",
+        description: "Морепродукты"
+      }
+    ];
+
+    const container = document.getElementById("products");
+
+    function showProducts(category) {
+      const filtered = products.filter(product =>
+        category === "all" || product.category === category
+      );
+
+      container.innerHTML = filtered.map(product => `
+        <article class="card">
+          <div class="photo">${product.emoji}</div>
+          <div class="info">
+            <h3>${product.name}</h3>
+            <p>${product.description}</p>
+            <div class="price">Уточняйте цену</div>
+          </div>
+        </article>
+      `).join("");
+    }
+
+    document.querySelectorAll(".filter").forEach(button => {
+      button.addEventListener("click", () => {
+        document.querySelectorAll(".filter").forEach(item =>
+          item.classList.remove("active")
+        );
+
+        button.classList.add("active");
+        showProducts(button.dataset.category);
+      });
+    });
+
+    showProducts("all");
+
+    if (window.Telegram?.WebApp) {
+      Telegram.WebApp.ready();
+      Telegram.WebApp.expand();
+    }
+  </script>
+
+</body>
+</html>
