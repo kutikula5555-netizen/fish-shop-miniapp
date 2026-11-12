@@ -9,36 +9,34 @@
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
-      padding: 20px 16px 32px;
+      padding: 16px;
       font-family: Arial, sans-serif;
       background: var(--tg-theme-bg-color, #f5f7f5);
       color: var(--tg-theme-text-color, #17251f);
     }
 
     .header {
-      padding: 22px 18px;
+      padding: 24px 20px;
       border-radius: 20px;
       background: #174d3b;
       color: white;
-      margin-bottom: 22px;
+      margin-bottom: 24px;
     }
 
     .header h1 {
       font-size: 25px;
-      margin: 0 0 8px;
+      margin: 0 0 10px;
     }
 
     .header p {
       margin: 0;
-      opacity: 0.85;
       font-size: 14px;
       line-height: 1.5;
+      opacity: .88;
     }
 
     h2 {
@@ -50,17 +48,19 @@
       display: flex;
       gap: 8px;
       overflow-x: auto;
-      margin-bottom: 16px;
+      padding-bottom: 8px;
+      margin-bottom: 14px;
     }
 
     .filter {
-      border: none;
+      border: 0;
       border-radius: 20px;
-      padding: 10px 16px;
+      padding: 11px 15px;
       white-space: nowrap;
       background: #e5eee9;
       color: #174d3b;
       font-weight: 600;
+      cursor: pointer;
     }
 
     .filter.active {
@@ -78,57 +78,80 @@
       background: var(--tg-theme-secondary-bg-color, white);
       border-radius: 16px;
       overflow: hidden;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      box-shadow: 0 2px 10px rgba(0,0,0,.06);
     }
 
     .photo {
-      height: 115px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 58px;
-      background: #e7f0eb;
+      width: 100%;
+      height: 145px;
+      object-fit: cover;
+      display: block;
+      background: #e5eee9;
     }
 
     .info {
       padding: 12px;
     }
 
-    .info h3 {
-      margin: 0 0 6px;
-      font-size: 16px;
+    .category {
+      font-size: 10px;
+      color: var(--tg-theme-hint-color, #78847d);
+      margin-bottom: 7px;
     }
 
-    .info p {
-      margin: 0 0 10px;
-      color: var(--tg-theme-hint-color, #78847d);
+    .info h3 {
+      margin: 0 0 8px;
+      font-size: 15px;
+      line-height: 1.35;
+    }
+
+    .description {
+      margin: 0 0 12px;
       font-size: 12px;
+      line-height: 1.45;
+      color: var(--tg-theme-hint-color, #78847d);
     }
 
     .price {
       color: #176b48;
       font-weight: bold;
-      font-size: 13px;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .origin {
+      margin-top: 7px;
+      font-size: 11px;
+      color: var(--tg-theme-hint-color, #78847d);
     }
 
     .section {
-      margin-top: 25px;
-      padding: 17px;
-      background: var(--tg-theme-secondary-bg-color, white);
+      margin-top: 24px;
+      padding: 18px;
       border-radius: 16px;
+      background: var(--tg-theme-secondary-bg-color, white);
     }
 
     .section p {
-      color: var(--tg-theme-hint-color, #78847d);
       font-size: 14px;
       line-height: 1.5;
+      color: var(--tg-theme-hint-color, #78847d);
+    }
+
+    .status {
+      padding: 20px;
+      text-align: center;
+      color: var(--tg-theme-hint-color, #78847d);
+      font-size: 14px;
+      grid-column: 1 / -1;
     }
 
     footer {
       text-align: center;
-      margin-top: 25px;
-      color: var(--tg-theme-hint-color, #78847d);
+      margin-top: 28px;
+      padding-bottom: 20px;
       font-size: 12px;
+      color: var(--tg-theme-hint-color, #78847d);
     }
   </style>
 </head>
@@ -136,106 +159,164 @@
 <body>
 
   <header class="header">
-    <h1>🐟 Рыбный магазин</h1>
-    <p>Свежая рыба и морепродукты.
-      Выбирайте то, что любите!</p>
+    <h1>🐟 Наш рыбный магазин</h1>
+    <p>
+      Рыба и морепродукты для вашего стола.
+      Выбирайте любимые деликатесы!
+    </p>
   </header>
 
   <h2>Наш ассортимент</h2>
 
-  <div class="filters">
-    <button class="filter active" data-category="all">Всё</button>
-    <button class="filter" data-category="fish">Рыба</button>
-    <button class="filter" data-category="seafood">Морепродукты</button>
+  <div class="filters" id="filters"></div>
+
+  <div class="products" id="products">
+    <div class="status">Загружаем ассортимент...</div>
   </div>
 
-  <div class="products" id="products"></div>
-
-  <div class="section">
+  <section class="section">
     <h2>📍 Наши магазины</h2>
-    <p>Здесь скоро появятся адреса и график работы наших торговых точек.</p>
-  </div>
+    <p>
+      Адреса и время работы появятся здесь.
+      Уточняйте подробности у продавца.
+    </p>
+  </section>
 
-  <div class="section">
+  <section class="section">
     <h2>📞 Как заказать</h2>
-    <p>По вопросам наличия и оформления заказа свяжитесь с нашим продавцом.</p>
-  </div>
+    <p>
+      По вопросам наличия и оформления заказа
+      свяжитесь с нашим продавцом.
+    </p>
+  </section>
 
   <footer>
     Рыбный магазин · Добро пожаловать!
   </footer>
 
   <script>
-    const products = [
-      {
-        name: "Сёмга",
-        category: "fish",
-        emoji: "🐟",
-        description: "Красная рыба"
-      },
-      {
-        name: "Дорадо",
-        category: "fish",
-        emoji: "🐠",
-        description: "Для запекания и гриля"
-      },
-      {
-        name: "Сибас",
-        category: "fish",
-        emoji: "🐟",
-        description: "Нежное мясо"
-      },
-      {
-        name: "Креветки",
-        category: "seafood",
-        emoji: "🦐",
-        description: "Морепродукты"
-      },
-      {
-        name: "Кальмар",
-        category: "seafood",
-        emoji: "🦑",
-        description: "Для горячих блюд"
-      },
-      {
-        name: "Мидии",
-        category: "seafood",
-        emoji: "🐚",
-        description: "Морепродукты"
-      }
-    ];
+    const productsContainer =
+      document.getElementById("products");
 
-    const container = document.getElementById("products");
+    const filtersContainer =
+      document.getElementById("filters");
 
-    function showProducts(category) {
-      const filtered = products.filter(product =>
-        category === "all" || product.category === category
-      );
+    let products = [];
 
-      container.innerHTML = filtered.map(product => `
-        <article class="card">
-          <div class="photo">${product.emoji}</div>
-          <div class="info">
-            <h3>${product.name}</h3>
-            <p>${product.description}</p>
-            <div class="price">Уточняйте цену</div>
-          </div>
-        </article>
-      `).join("");
+    function formatPrice(product) {
+      const amount = new Intl.NumberFormat("ru-RU", {
+        maximumFractionDigits: 2
+      }).format(product.price);
+
+      return `${amount} ₽ / ${product.unit}`;
     }
 
-    document.querySelectorAll(".filter").forEach(button => {
-      button.addEventListener("click", () => {
-        document.querySelectorAll(".filter").forEach(item =>
-          item.classList.remove("active")
+    function createFilters() {
+      const categories = [
+        "Все",
+        ...new Set(products.map(p => p.category))
+      ];
+
+      filtersContainer.innerHTML = "";
+
+      categories.forEach(category => {
+        const button = document.createElement("button");
+
+        button.className =
+          "filter" + (category === "Все" ? " active" : "");
+
+        button.textContent = category;
+
+        button.addEventListener("click", () => {
+          document.querySelectorAll(".filter").forEach(btn =>
+            btn.classList.remove("active")
+          );
+
+          button.classList.add("active");
+
+          showProducts(category);
+        });
+
+        filtersContainer.appendChild(button);
+      });
+    }
+
+    function showProducts(category = "Все") {
+      const filtered = products.filter(product =>
+        category === "Все" || product.category === category
+      );
+
+      productsContainer.innerHTML = "";
+
+      filtered.forEach(product => {
+        const card = document.createElement("article");
+        card.className = "card";
+
+        const image = document.createElement("img");
+        image.className = "photo";
+        image.src = product.image;
+        image.alt = product.name;
+        image.loading = "lazy";
+
+        const info = document.createElement("div");
+        info.className = "info";
+
+        const categoryLabel = document.createElement("div");
+        categoryLabel.className = "category";
+        categoryLabel.textContent = product.category;
+
+        const name = document.createElement("h3");
+        name.textContent = product.name;
+
+        const description = document.createElement("p");
+        description.className = "description";
+        description.textContent = product.description;
+
+        const price = document.createElement("div");
+        price.className = "price";
+        price.textContent = formatPrice(product);
+
+        info.append(
+          categoryLabel,
+          name,
+          description,
+          price
         );
 
-        button.classList.add("active");
-        showProducts(button.dataset.category);
-      });
-    });
+        if (product.origin) {
+          const origin = document.createElement("div");
+          origin.className = "origin";
+          origin.textContent = "📍 " + product.origin;
+          info.appendChild(origin);
+        }
 
-    showProducts("all");
+        card.append(image, info);
+        productsContainer.appendChild(card);
+      });
+    }
+
+    async function loadProducts() {
+      try {
+        const response = await fetch("./products.json");
+
+        if (!response.ok) {
+          throw new Error("Не удалось загрузить каталог");
+        }
+
+        products = await response.json();
+
+        createFilters();
+        showProducts();
+
+      } catch (error) {
+        productsContainer.innerHTML =
+          '<div class="status">Не удалось загрузить ассортимент. Попробуйте обновить страницу.</div>';
+
+        console.error(error);
+      }
+    }
+
+    loadProducts();
 
     if (window.Telegram?.WebApp) {
       Telegram.WebApp.ready();
