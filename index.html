@@ -1,278 +1,123 @@
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#174d3b">
-  <title>Рыбный магазин</title>
-
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
-  <style>
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      padding: 16px 10px 30px;
-      font-family: Arial, sans-serif;
-      background: var(--tg-theme-bg-color, #f5f7f5);
-      color: var(--tg-theme-text-color, #17251f);
-    }
-
-    .header {
-      padding: 22px 18px;
-      border-radius: 20px;
-      background: #174d3b;
-      color: white;
-      margin-bottom: 22px;
-    }
-
-    .header h1 {
-      font-size: 25px;
-      margin: 0 0 8px;
-    }
-
-    .header p {
-      margin: 0;
-      opacity: 0.85;
-      font-size: 14px;
-      line-height: 1.5;
-    }
-
-    h2 {
-      font-size: 20px;
-      margin: 20px 0 14px;
-    }
-
-    .filters {
-      display: flex;
-      gap: 8px;
-      overflow-x: auto;
-      margin-bottom: 16px;
-      padding-bottom: 4px;
-    }
-
-    .filter {
-      border: none;
-      border-radius: 20px;
-      padding: 10px 16px;
-      white-space: nowrap;
-      background: #e5eee9;
-      color: #174d3b;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    .filter.active {
-      background: #174d3b;
-      color: white;
-    }
-
-    .products {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px;
-    }
-
-    .card {
-      overflow: hidden;
-      border-radius: 16px;
-      background: var(--tg-theme-secondary-bg-color, white);
-      box-shadow: 0 3px 12px rgba(0,0,0,0.06);
-    }
-
-    .photo {
-      height: 130px;
-      background: #e7f0eb;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-    }
-
-    .photo img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .photo .placeholder {
-      font-size: 54px;
-    }
-
-    .info {
-      padding: 12px;
-    }
-
-    .info h3 {
-      font-size: 15px;
-      margin: 0 0 6px;
-      line-height: 1.3;
-    }
-
-    .category {
-      font-size: 12px;
-      color: var(--tg-theme-hint-color, #84918b);
-      margin-bottom: 8px;
-    }
-
-    .description {
-      font-size: 13px;
-      line-height: 1.4;
-      margin-bottom: 10px;
-    }
-
-    .price {
-      color: #087a55;
-      font-weight: bold;
-      font-size: 14px;
-    }
-
-    .origin {
-      margin-top: 7px;
-      font-size: 12px;
-      color: var(--tg-theme-hint-color, #84918b);
-    }
-
-    .message {
-      text-align: center;
-      padding: 30px 15px;
-      color: var(--tg-theme-hint-color, #84918b);
-    }
-
-    @media (max-width: 350px) {
-      .products {
-        grid-template-columns: 1fr;
-      }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#092f35">
+<title>Чёрная треска — рыбный магазин</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{--ink:#102f34;--deep:#092f35;--teal:#164b50;--cream:#f7f2e9;--paper:#fffdfa;--muted:#7c8985;--salmon:#e8795d;--shadow:0 12px 30px rgba(30,49,45,.09)}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;padding:16px 15px 30px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;color:var(--ink);background:var(--tg-theme-bg-color,var(--cream))}
+.app{max-width:760px;margin:auto}
+.hero{position:relative;min-height:230px;overflow:hidden;display:flex;align-items:center;padding:28px 25px;border-radius:28px;color:#fffaf1;background:radial-gradient(circle at 78% 15%,rgba(232,121,93,.24),transparent 30%),linear-gradient(120deg,#062d33,#0b3d43 58%,#174e50);box-shadow:var(--shadow)}
+.hero:after{content:"";position:absolute;width:245px;height:245px;right:-56px;bottom:-95px;border:1px solid #ffffff2b;border-radius:50%;box-shadow:0 0 0 20px #ffffff09,0 0 0 42px #ffffff07}
+.hero-copy{position:relative;z-index:2;width:62%}.brand-mark{display:flex;align-items:center;gap:9px;margin-bottom:13px}.fish-icon{width:42px;height:28px}.brand-kicker{font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:#d9e3dc;font-weight:700}
+.hero h1{margin:0 0 11px;font-family:Georgia,serif;font-size:clamp(27px,7vw,38px);line-height:1.05;font-weight:600}.hero p{margin:0;max-width:260px;color:#e4ece5;font-size:14px;line-height:1.55}
+.hero-photo{position:absolute;z-index:1;right:-5px;bottom:0;top:0;width:45%;background:linear-gradient(90deg,#0b3d43,transparent 75%),url("atlantic-salmon-fillet.webp") center/cover no-repeat;opacity:.92;mask-image:linear-gradient(90deg,transparent,#000 30%)}
+.hero-rule{width:110px;height:1px;background:#e5b39a;margin:15px 0 12px}
+.section-head{margin:27px 1px 15px}.section-head h2{margin:0;font-size:24px;letter-spacing:-.035em}.section-head p{margin:6px 0 0;color:var(--muted);font-size:13px}
+.filters{display:flex;gap:9px;overflow-x:auto;padding:2px 1px 13px;margin:0 -1px 7px;scrollbar-width:none}.filters::-webkit-scrollbar{display:none}
+.filter{flex:0 0 auto;border:1px solid #102f341a;border-radius:999px;padding:11px 15px;background:#fffdfad9;color:var(--teal);font-size:12px;font-weight:700;cursor:pointer}
+.filter.active{color:white;background:var(--deep);border-color:var(--deep);box-shadow:0 5px 14px #092f352e}
+.products{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.card{min-width:0;overflow:hidden;border-radius:21px;background:var(--tg-theme-secondary-bg-color,var(--paper));box-shadow:var(--shadow);border:1px solid #ffffffbf;display:flex;flex-direction:column}
+.photo-wrap{position:relative;overflow:hidden;background:#e9e2d8}.photo{display:block;width:100%;height:155px;object-fit:cover}
+.category-tag{position:absolute;left:10px;top:10px;max-width:calc(100% - 20px);padding:6px 10px;border-radius:999px;background:#fffaf0f2;color:var(--teal);font-size:10px;font-weight:700}
+.info{padding:13px 13px 15px;display:flex;flex:1;flex-direction:column}.info h3{margin:0 0 8px;font-size:15px;line-height:1.3;letter-spacing:-.02em}
+.description{margin:0 0 13px;color:#75817d;font-size:12px;line-height:1.48;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.price{margin-top:auto;color:var(--teal);font-size:17px;font-weight:800;letter-spacing:-.02em}.origin{margin-top:7px;color:#89938e;font-size:11px}
+.stores{margin-top:30px;padding:21px;border-radius:23px;background:var(--tg-theme-secondary-bg-color,var(--paper));border:1px solid #102f3412;box-shadow:var(--shadow)}
+.stores-top{display:flex;align-items:center;gap:11px;margin-bottom:7px}.pin{width:35px;height:35px;display:grid;place-items:center;border-radius:12px;background:#e8eee8;font-size:17px}
+.stores h2{margin:0;font-size:20px}.stores p{margin:0;color:var(--muted);font-size:13px;line-height:1.5}
+.store-link{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:15px;padding:13px 14px;border-radius:14px;text-decoration:none;color:var(--deep);background:#f3f5ef;font-size:13px;font-weight:700;opacity:.7}
+.store-note{margin-top:12px!important;font-size:11px!important}
+footer{padding:24px 0 5px;text-align:center;color:#8c9690;font-size:11px}.status{grid-column:1/-1;padding:28px 12px;text-align:center;color:var(--muted);font-size:13px}
+@media(min-width:600px){body{padding:24px}.hero{min-height:285px;padding:38px}.photo{height:210px}.info{padding:17px}.info h3{font-size:17px}.description{font-size:13px}.products{gap:18px}}
+@media(max-width:360px){body{padding:10px}.hero{min-height:205px;padding:20px}.hero-copy{width:70%}.hero-photo{width:43%}.photo{height:125px}.info{padding:10px}.info h3{font-size:13px}.price{font-size:15px}}
+</style>
 </head>
-
 <body>
-
-  <header class="header">
-    <h1>🐟 Рыбный магазин</h1>
-    <p>Свежая рыба и морепродукты. Выбирайте то, что любите!</p>
-  </header>
-
-  <h2>Наш ассортимент</h2>
-
-  <div class="filters" id="filters"></div>
-
-  <div class="products" id="products">
-    <div class="message">Загружаем ассортимент...</div>
-  </div>
-
-  <script>
-    const tg = window.Telegram.WebApp;
-    tg.ready();
-    tg.expand();
-
-    const productsContainer = document.getElementById("products");
-    const filtersContainer = document.getElementById("filters");
-
-    let products = [];
-    let activeCategory = "all";
-
-    function formatPrice(product) {
-      const price = new Intl.NumberFormat("ru-RU", {
-        maximumFractionDigits: 2
-      }).format(product.price);
-
-      return `${price} ${product.currency} / ${product.unit}`;
-    }
-
-    function showProducts(category) {
-      activeCategory = category;
-
-      const filtered = category === "all"
-        ? products
-        : products.filter(p => p.category === category);
-
-      if (filtered.length === 0) {
-        productsContainer.innerHTML =
-          '<div class="message">В этой категории пока нет товаров</div>';
-        return;
-      }
-
-      productsContainer.innerHTML = filtered.map(product => `
-        <article class="card">
-          <div class="photo">
-            <img
-              src="./${product.image}"
-              alt="${product.name}"
-              onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
-            >
-            <div class="placeholder" style="display:none">🐟</div>
-          </div>
-
-          <div class="info">
-            <h3>${product.name}</h3>
-            <div class="category">${product.category}</div>
-            <div class="description">${product.description || ""}</div>
-            <div class="price">${formatPrice(product)}</div>
-            ${product.origin
-              ? `<div class="origin">Происхождение: ${product.origin}</div>`
-              : ""}
-          </div>
-        </article>
-      `).join("");
-    }
-
-    function createFilters() {
-      const categories = [...new Set(products.map(p => p.category))];
-
-      const buttons = [
-        { name: "Все", value: "all" },
-        ...categories.map(category => ({
-          name: category,
-          value: category
-        }))
-      ];
-
-      filtersContainer.innerHTML = buttons.map(item => `
-        <button
-          class="filter ${item.value === "all" ? "active" : ""}"
-          data-category="${item.value}"
-        >${item.name}</button>
-      `).join("");
-
-      filtersContainer.querySelectorAll(".filter").forEach(button => {
-        button.addEventListener("click", () => {
-          filtersContainer.querySelectorAll(".filter").forEach(item => {
-            item.classList.remove("active");
-          });
-
-          button.classList.add("active");
-          showProducts(button.dataset.category);
-        });
-      });
-    }
-
-    async function loadProducts() {
-      try {
-        const response = await fetch("./products.json");
-
-        if (!response.ok) {
-          throw new Error("Не удалось загрузить products.json");
-        }
-
-        products = await response.json();
-
-        createFilters();
-        showProducts("all");
-
-      } catch (error) {
-        console.error(error);
-        productsContainer.innerHTML =
-          '<div class="message">Не удалось загрузить каталог. Попробуйте позже.</div>';
-      }
-    }
-
-    loadProducts();
-  </script>
-
+<main class="app">
+<header class="hero">
+<div class="hero-copy">
+<div class="brand-mark">
+<svg class="fish-icon" viewBox="0 0 100 55" fill="none" aria-hidden="true"><path d="M8 28C22 10 53 5 77 25L94 13L89 28L94 42L77 32C53 51 22 46 8 28Z" stroke="#F8F2E8" stroke-width="2.5" stroke-linejoin="round"/><circle cx="69" cy="24" r="2.5" fill="#F8F2E8"/><path d="M34 14L44 28L34 42" stroke="#F8F2E8" stroke-width="1.7"/></svg>
+<span class="brand-kicker">Рыбный магазин</span>
+</div>
+<h1>Чёрная<br>треска</h1><div class="hero-rule"></div>
+<p>Рыба и морепродукты для вашего стола</p>
+</div><div class="hero-photo" aria-hidden="true"></div>
+</header>
+<section aria-labelledby="catalog-title">
+<div class="section-head"><h2 id="catalog-title">Наш ассортимент</h2><p>Выбирайте деликатесы к своему столу</p></div>
+<nav class="filters" id="filters" aria-label="Категории товаров"></nav>
+<div class="products" id="products"><div class="status">Загружаем ассортимент…</div></div>
+</section>
+<section class="stores" aria-labelledby="stores-title">
+<div class="stores-top"><div class="pin">📍</div><h2 id="stores-title">Наши магазины</h2></div>
+<p>Выберите удобный магазин — откроем его расположение на карте.</p>
+<div class="store-link"><span>Адреса магазинов скоро появятся</span><span>⌖</span></div>
+<p class="store-note">Добавим реальные адреса и ссылки на карты после уточнения.</p>
+</section>
+<footer>Чёрная треска · Рыба и морепродукты</footer>
+</main>
+<script>
+const productsContainer=document.getElementById("products");
+const filtersContainer=document.getElementById("filters");
+let products=[];
+const categoryIcons={"Морепродукты":"🦐","Копчёная рыба":"♨","Слабосолёная рыба":"🐟","Икра и деликатесы":"🟠"};
+function formatPrice(product){
+ const amount=new Intl.NumberFormat("ru-RU",{maximumFractionDigits:2}).format(product.price);
+ return `${amount} ₽ / ${product.unit}`;
+}
+function createFilters(){
+ const categories=["Все",...new Set(products.map(p=>p.category))];
+ filtersContainer.innerHTML="";
+ categories.forEach(category=>{
+  const button=document.createElement("button");button.type="button";
+  button.className="filter"+(category==="Все"?" active":"");
+  button.textContent=category==="Все"?"Все":`${categoryIcons[category]||"•"}  ${category}`;
+  button.addEventListener("click",()=>{
+   filtersContainer.querySelectorAll(".filter").forEach(btn=>btn.classList.remove("active"));
+   button.classList.add("active");showProducts(category);
+  });
+  filtersContainer.appendChild(button);
+ });
+}
+function showProducts(category="Все"){
+ const filtered=products.filter(p=>category==="Все"||p.category===category);
+ productsContainer.innerHTML="";
+ if(!filtered.length){productsContainer.innerHTML='<div class="status">В этой категории пока нет товаров.</div>';return;}
+ filtered.forEach(product=>{
+  const card=document.createElement("article");card.className="card";
+  const photoWrap=document.createElement("div");photoWrap.className="photo-wrap";
+  const image=document.createElement("img");image.className="photo";image.src=product.image;image.alt=product.name;image.loading="lazy";
+  image.onerror=()=>{image.style.display="none";};
+  const tag=document.createElement("span");tag.className="category-tag";tag.textContent=product.category;
+  photoWrap.append(image,tag);
+  const info=document.createElement("div");info.className="info";
+  const name=document.createElement("h3");name.textContent=product.name;
+  const description=document.createElement("p");description.className="description";description.textContent=product.description;
+  const price=document.createElement("div");price.className="price";price.textContent=formatPrice(product);
+  info.append(name,description,price);
+  if(product.origin){const origin=document.createElement("div");origin.className="origin";origin.textContent="📍 "+product.origin;info.appendChild(origin);}
+  card.append(photoWrap,info);productsContainer.appendChild(card);
+ });
+}
+async function loadProducts(){
+ try{
+  const response=await fetch("./products.json");if(!response.ok)throw new Error("Не удалось загрузить каталог");
+  products=await response.json();createFilters();showProducts();
+ }catch(error){
+  productsContainer.innerHTML='<div class="status">Не удалось загрузить ассортимент. Проверьте products.json и обновите страницу.</div>';
+  console.error(error);
+ }
+}
+loadProducts();
+if(window.Telegram?.WebApp){Telegram.WebApp.ready();Telegram.WebApp.expand();}
+</script>
 </body>
 </html>
