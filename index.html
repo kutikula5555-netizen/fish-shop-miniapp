@@ -156,22 +156,28 @@ body {
   box-shadow: 0 5px 14px rgba(8,47,53,.2);
 }
 
+
 /* КАРТОЧКИ ТОВАРОВ */
 
 .products {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 13px;
+  gap: 14px;
 }
 
 .card {
   min-width: 0;
   overflow: hidden;
-  border-radius: 19px;
+  border-radius: 20px;
   background: var(--paper);
   box-shadow: var(--shadow);
   display: flex;
   flex-direction: column;
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.card:active {
+  transform: scale(.98);
 }
 
 .photo-wrap {
@@ -183,7 +189,7 @@ body {
 .photo {
   display: block;
   width: 100%;
-  height: 155px;
+  height: 165px;
   object-fit: cover;
 }
 
@@ -208,19 +214,20 @@ body {
 }
 
 .info h3 {
-  margin: 0 0 8px;
+  margin: 0 0 6px;
   color: var(--ink);
   font-size: 15px;
   line-height: 1.3;
+  font-weight: 750;
 }
 
 .description {
   margin: 0 0 13px;
   color: var(--muted);
   font-size: 12px;
-  line-height: 1.48;
+  line-height: 1.45;
   display: -webkit-box;
-  -webkit-line-clamp: 4;
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -230,12 +237,11 @@ body {
   color: var(--tg-theme-link-color, #14665b);
   font-size: 17px;
   font-weight: 800;
+  letter-spacing: -.02em;
 }
 
 .origin {
-  margin-top: 7px;
-  color: var(--muted);
-  font-size: 11px;
+  display: none;
 }
 
 /* МАГАЗИНЫ */
