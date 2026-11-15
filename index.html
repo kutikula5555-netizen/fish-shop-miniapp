@@ -598,7 +598,7 @@ function showProducts(category="Все"){
  if(!filtered.length){productsContainer.innerHTML='<div class="status">В этой категории пока нет товаров.</div>';return;}
  filtered.forEach(product=>{
   const card=document.createElement("article");card.className="card";
-card.addEventListener("click",()=>openProduct(product));
+card.addEventListener("click",()=>openCatalogProduct(product));
   const photoWrap=document.createElement("div");photoWrap.className="photo-wrap";
   const image=document.createElement("img");image.className="photo";image.src=product.image;image.alt=product.name;image.loading="lazy";
   image.onerror=()=>{image.style.display="none";};
@@ -651,18 +651,25 @@ history.pushState({page:"product"}, "");
 
   window.scrollTo(0,0);
 }
-
+const tgBackButton = window.Telegram.WebApp.BackButton;
 function showCatalog(){
   document.getElementById("productDetail").hidden=true;
   document.getElementById("catalogSection").hidden=false;
+
+  tgBackButton.hide();
   window.scrollTo(0,0);
 }
 
+function openCatalogProduct(product){
+  openProduct(product);
+  tgBackButton.show();
+}
+
 document.getElementById("backToCatalog").addEventListener("click",()=>{
-  history.back();
+  showCatalog();
 });
 
-window.addEventListener("popstate",()=>{
+tgBackButton.onClick(()=>{
   showCatalog();
 });
 async function loadProducts(){
