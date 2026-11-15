@@ -244,6 +244,110 @@ body {
   display: none;
 }
 
+/* ПОЛНОЭКРАННАЯ КАРТОЧКА ТОВАРА */
+
+[hidden] {
+  display: none !important;
+}
+
+.product-detail {
+  margin-top: 20px;
+  animation: detailAppear .25s ease;
+}
+
+@keyframes detailAppear {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.back-button {
+  display: inline-flex;
+  align-items: center;
+  border: none;
+  border-radius: 12px;
+  padding: 11px 15px;
+  margin-bottom: 15px;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.detail-photo-wrap {
+  overflow: hidden;
+  border-radius: 22px;
+  background: #e9e2d8;
+}
+
+.detail-photo {
+  display: block;
+  width: 100%;
+  max-height: 370px;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+
+.detail-content {
+  padding: 19px 4px;
+}
+
+.detail-category {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.detail-content h2 {
+  margin: 9px 0;
+  color: var(--ink);
+  font-size: 24px;
+  line-height: 1.25;
+}
+
+.detail-price {
+  margin: 13px 0 24px;
+  color: var(--tg-theme-link-color, #14665b);
+  font-size: 23px;
+  font-weight: 800;
+}
+
+.detail-section {
+  margin-top: 23px;
+  padding: 17px;
+  border-radius: 17px;
+  background: var(--paper);
+  box-shadow: var(--shadow);
+}
+
+.detail-section h3 {
+  margin: 0 0 10px;
+  color: var(--ink);
+  font-size: 16px;
+}
+
+.detail-section p,
+.detail-section li {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.detail-section p {
+  margin: 0;
+}
+
+.detail-section ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
 /* МАГАЗИНЫ */
 
 .stores {
@@ -413,11 +517,50 @@ footer {
     </div>
   </div>
 </header>
-<section aria-labelledby="catalog-title">
+<section id="catalogSection" aria-labelledby="catalog-title">
 <div class="section-head"><h2 id="catalog-title">Наш ассортимент</h2><p>Выбирайте деликатесы к своему столу</p></div>
 <nav class="filters" id="filters" aria-label="Категории товаров"></nav>
 <div class="products" id="products"><div class="status">Загружаем ассортимент…</div></div>
 </section>
+  
+<section class="product-detail" id="productDetail" hidden>
+  <button class="back-button" id="backToCatalog" type="button">
+    ← Назад к ассортименту
+  </button>
+
+  <div class="detail-photo-wrap">
+    <img id="detailImage" class="detail-photo" src="" alt="">
+  </div>
+
+  <div class="detail-content">
+    <span class="detail-category" id="detailCategory"></span>
+
+    <h2 id="detailName"></h2>
+
+    <div class="detail-price" id="detailPrice"></div>
+
+    <div class="detail-section">
+      <h3>О товаре</h3>
+      <p id="detailDescription"></p>
+    </div>
+
+    <div class="detail-section" id="detailUsageBlock" hidden>
+      <h3>Как лучше использовать</h3>
+      <ul id="detailUsage"></ul>
+    </div>
+
+    <div class="detail-section" id="detailOriginBlock" hidden>
+      <h3>Происхождение</h3>
+      <p id="detailOrigin"></p>
+    </div>
+
+    <div class="detail-section">
+      <h3>Где купить</h3>
+      <p>Адреса магазинов и ссылки на карты добавим после уточнения.</p>
+    </div>
+  </div>
+</section>
+
 <section class="stores" aria-labelledby="stores-title">
 <div class="stores-top"><div class="pin">📍</div><h2 id="stores-title">Наши магазины</h2></div>
 <p>Выберите удобный магазин — откроем его расположение на карте.</p>
