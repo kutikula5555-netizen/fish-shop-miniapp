@@ -619,7 +619,7 @@ function openProduct(product){
 
   const detail=document.getElementById("productDetail");
   detail.hidden=false;
-
+history.pushState({page:"product"}, "");
   const image=document.getElementById("detailImage");
   image.src=product.image;
   image.alt=product.name;
@@ -652,11 +652,19 @@ function openProduct(product){
   window.scrollTo(0,0);
 }
 
-document.getElementById("backToCatalog").addEventListener("click",()=>{
+function showCatalog(){
   document.getElementById("productDetail").hidden=true;
   document.getElementById("catalogSection").hidden=false;
   window.scrollTo(0,0);
-}); 
+}
+
+document.getElementById("backToCatalog").addEventListener("click",()=>{
+  history.back();
+});
+
+window.addEventListener("popstate",()=>{
+  showCatalog();
+});
 async function loadProducts(){
  try{
   const response=await fetch("./products.json");if(!response.ok)throw new Error("Не удалось загрузить каталог");
