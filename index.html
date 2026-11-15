@@ -462,7 +462,7 @@ function showProducts(category="Все"){
   photoWrap.append(image,tag);
   const info=document.createElement("div");info.className="info";
   const name=document.createElement("h3");name.textContent=product.name;
-  const description=document.createElement("p");description.className="description.textContent=product.shortDescription || product.description;
+  const description=document.createElement("p");description.className="description";description.textContent=product.shortDescription || product.description;
   const price=document.createElement("div");price.className="price";price.textContent=formatPrice(product);
   info.append(name,description,price);
   if(product.origin){const origin=document.createElement("div");origin.className="origin";origin.textContent="📍 "+product.origin;info.appendChild(origin);}
