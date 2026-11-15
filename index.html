@@ -598,6 +598,7 @@ function showProducts(category="Все"){
  if(!filtered.length){productsContainer.innerHTML='<div class="status">В этой категории пока нет товаров.</div>';return;}
  filtered.forEach(product=>{
   const card=document.createElement("article");card.className="card";
+card.addEventListener("click",()=>openProduct(product));
   const photoWrap=document.createElement("div");photoWrap.className="photo-wrap";
   const image=document.createElement("img");image.className="photo";image.src=product.image;image.alt=product.name;image.loading="lazy";
   image.onerror=()=>{image.style.display="none";};
@@ -612,6 +613,50 @@ function showProducts(category="Все"){
   card.append(photoWrap,info);productsContainer.appendChild(card);
  });
 }
+ 
+function openProduct(product){
+  document.getElementById("catalogSection").hidden=true;
+
+  const detail=document.getElementById("productDetail");
+  detail.hidden=false;
+
+  const image=document.getElementById("detailImage");
+  image.src=product.image;
+  image.alt=product.name;
+
+  document.getElementById("detailCategory").textContent=product.category;
+  document.getElementById("detailName").textContent=product.name;
+  document.getElementById("detailPrice").textContent=formatPrice(product);
+  document.getElementById("detailDescription").textContent=product.description;
+
+  const originBlock=document.getElementById("detailOriginBlock");
+  originBlock.hidden=!product.origin;
+
+  if(product.origin){
+    document.getElementById("detailOrigin").textContent=product.origin;
+  }
+
+  const usageBlock=document.getElementById("detailUsageBlock");
+  usageBlock.hidden=!product.usage || !product.usage.length;
+
+  if(product.usage){
+    const usageList=document.getElementById("detailUsage");
+    usageList.innerHTML="";
+    product.usage.forEach(item=>{
+      const li=document.createElement("li");
+      li.textContent=item;
+      usageList.appendChild(li);
+    });
+  }
+
+  window.scrollTo(0,0);
+}
+
+document.getElementById("backToCatalog").addEventListener("click",()=>{
+  document.getElementById("productDetail").hidden=true;
+  document.getElementById("catalogSection").hidden=false;
+  window.scrollTo(0,0);
+}); 
 async function loadProducts(){
  try{
   const response=await fetch("./products.json");if(!response.ok)throw new Error("Не удалось загрузить каталог");
