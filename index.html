@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -156,6 +155,37 @@ body {
   box-shadow: 0 5px 14px rgba(8,47,53,.2);
 }
 
+
+
+/* ПОИСК ПО АССОРТИМЕНТУ */
+.search-form { margin: 18px 1px 0; }
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
+.search-box {
+  display: flex; align-items: center; gap: 8px; min-height: 52px;
+  padding: 5px 6px 5px 16px; border: 1px solid #dce4e0;
+  border-radius: 16px; background: var(--paper); box-shadow: var(--shadow);
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+.search-box:focus-within {
+  border-color: var(--teal); box-shadow: 0 0 0 3px rgba(20, 83, 90, .10);
+}
+.search-box input {
+  flex: 1; min-width: 0; border: 0; outline: 0; background: transparent;
+  color: var(--ink); font: inherit; font-size: 14px;
+}
+.search-box input::placeholder { color: var(--muted); opacity: 1; }
+.search-button {
+  width: 40px; height: 40px; flex: 0 0 40px; display: grid; place-items: center;
+  border: 0; border-radius: 12px; background: var(--deep); color: #fff; cursor: pointer;
+}
+.search-button:active { transform: scale(.96); }
+.search-button svg {
+  width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 2;
+  stroke-linecap: round;
+}
 
 /* КАРТОЧКИ ТОВАРОВ */
 
@@ -517,6 +547,20 @@ footer {
     </div>
   </div>
 </header>
+
+<form class="search-form" id="searchForm" role="search">
+  <label class="visually-hidden" for="catalogSearch">Поиск по ассортименту</label>
+  <div class="search-box">
+    <input id="catalogSearch" type="search" placeholder="Найти рыбу или морепродукты..." autocomplete="off">
+    <button class="search-button" type="submit" aria-label="Найти товары">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="10.8" cy="10.8" r="6.8"></circle>
+        <path d="m16 16 5 5"></path>
+      </svg>
+    </button>
+  </div>
+</form>
+
 <section id="catalogSection" aria-labelledby="catalog-title">
 <div class="section-head"><h2 id="catalog-title">Наш ассортимент</h2><p>Выбирайте деликатесы к своему столу</p></div>
 <nav class="filters" id="filters" aria-label="Категории товаров"></nav>
@@ -572,48 +616,102 @@ footer {
 <script>
 const productsContainer=document.getElementById("products");
 const filtersContainer=document.getElementById("filters");
+const searchForm=document.getElementById("searchForm");
+const searchInput=document.getElementById("catalogSearch");
 let products=[];
+let activeCategory="Все";
 const categoryIcons={"Морепродукты":"🦐","Копчёная рыба":"♨","Слабосолёная рыба":"🐟","Икра и деликатесы":"🟠"};
 function formatPrice(product){
  const amount=new Intl.NumberFormat("ru-RU",{maximumFractionDigits:2}).format(product.price);
  return `${amount} ₽ / ${product.unit}`;
 }
 function createFilters(){
- const categories=["Все",...new Set(products.map(p=>p.category))];
- filtersContainer.innerHTML="";
- categories.forEach(category=>{
-  const button=document.createElement("button");button.type="button";
-  button.className="filter"+(category==="Все"?" active":"");
-  button.textContent=category==="Все"?"Все":`${categoryIcons[category]||"•"}  ${category}`;
-  button.addEventListener("click",()=>{
-   filtersContainer.querySelectorAll(".filter").forEach(btn=>btn.classList.remove("active"));
-   button.classList.add("active");showProducts(category);
+  const categories=["Все",...new Set(products.map(p=>p.category))];
+  filtersContainer.innerHTML="";
+  categories.forEach(category=>{
+    const button=document.createElement("button");
+    button.type="button";
+    button.className="filter"+(category==="Все"?" active":"");
+    button.textContent=category==="Все"?"Все":`${categoryIcons[category]||"•"}  ${category}`;
+    button.addEventListener("click",()=>{
+      activeCategory=category;
+      filtersContainer.querySelectorAll(".filter").forEach(btn=>btn.classList.remove("active"));
+      button.classList.add("active");
+      showProducts();
+    });
+    filtersContainer.appendChild(button);
   });
-  filtersContainer.appendChild(button);
- });
 }
-function showProducts(category="Все"){
- const filtered=products.filter(p=>category==="Все"||p.category===category);
- productsContainer.innerHTML="";
- if(!filtered.length){productsContainer.innerHTML='<div class="status">В этой категории пока нет товаров.</div>';return;}
- filtered.forEach(product=>{
-  const card=document.createElement("article");card.className="card";
-card.addEventListener("click",()=>openCatalogProduct(product));
-  const photoWrap=document.createElement("div");photoWrap.className="photo-wrap";
-  const image=document.createElement("img");image.className="photo";image.src=product.image;image.alt=product.name;image.loading="lazy";
-  image.onerror=()=>{image.style.display="none";};
-  const tag=document.createElement("span");tag.className="category-tag";tag.textContent=product.category;
-  photoWrap.append(image,tag);
-  const info=document.createElement("div");info.className="info";
-  const name=document.createElement("h3");name.textContent=product.name;
-  const description=document.createElement("p");description.className="description";description.textContent=product.shortDescription || product.description;
-  const price=document.createElement("div");price.className="price";price.textContent=formatPrice(product);
-  info.append(name,description,price);
-  if(product.origin){const origin=document.createElement("div");origin.className="origin";origin.textContent="📍 "+product.origin;info.appendChild(origin);}
-  card.append(photoWrap,info);productsContainer.appendChild(card);
- });
+
+function showProducts(){
+  const query=searchInput.value.trim().toLocaleLowerCase("ru");
+  const filtered=products.filter(product=>{
+    const matchesCategory=activeCategory==="Все"||product.category===activeCategory;
+    const searchableText=[
+      product.name, product.category, product.description,
+      product.shortDescription, product.origin
+    ].filter(Boolean).join(" ").toLocaleLowerCase("ru");
+    return matchesCategory && (!query || searchableText.includes(query));
+  });
+
+  productsContainer.innerHTML="";
+  if(!filtered.length){
+    productsContainer.innerHTML='<div class="status">Ничего не найдено. Попробуйте изменить запрос.</div>';
+    return;
+  }
+
+  filtered.forEach(product=>{
+    const card=document.createElement("article");
+    card.className="card";
+    card.addEventListener("click",()=>openCatalogProduct(product));
+
+    const photoWrap=document.createElement("div");
+    photoWrap.className="photo-wrap";
+    const image=document.createElement("img");
+    image.className="photo";
+    image.src=product.image;
+    image.alt=product.name;
+    image.loading="lazy";
+    image.onerror=()=>{image.style.display="none";};
+
+    const tag=document.createElement("span");
+    tag.className="category-tag";
+    tag.textContent=product.category;
+    photoWrap.append(image,tag);
+
+    const info=document.createElement("div");
+    info.className="info";
+    const name=document.createElement("h3");
+    name.textContent=product.name;
+    const description=document.createElement("p");
+    description.className="description";
+    description.textContent=product.shortDescription||product.description;
+    const price=document.createElement("div");
+    price.className="price";
+    price.textContent=formatPrice(product);
+    info.append(name,description,price);
+
+    if(product.origin){
+      const origin=document.createElement("div");
+      origin.className="origin";
+      origin.textContent="📍 "+product.origin;
+      info.appendChild(origin);
+    }
+    card.append(photoWrap,info);
+    productsContainer.appendChild(card);
+  });
 }
- 
+
+searchForm.addEventListener("submit",event=>{
+  event.preventDefault();
+  activeCategory="Все";
+  filtersContainer.querySelectorAll(".filter").forEach(button=>{
+    button.classList.toggle("active",button.textContent==="Все");
+  });
+  showProducts();
+  productsContainer.scrollIntoView({behavior:"smooth",block:"start"});
+});
+
 function openProduct(product){
   document.getElementById("catalogSection").hidden=true;
 
