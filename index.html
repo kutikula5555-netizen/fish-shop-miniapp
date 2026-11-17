@@ -158,7 +158,14 @@ body {
 
 
 /* ПОИСК ПО АССОРТИМЕНТУ */
-.search-form { margin: 18px 1px 0; }
+.search-form {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  margin: 18px -1px 0;
+  padding: 8px 1px;
+  background: var(--tg-theme-bg-color, #f4f6f3);
+}
 .visually-hidden {
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
   overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
@@ -712,12 +719,19 @@ searchForm.addEventListener("submit",event=>{
   productsContainer.scrollIntoView({behavior:"smooth",block:"start"});
 });
 
+let catalogScrollY=0;
+
 function openProduct(product){
+  // Запоминаем позицию списка, чтобы вернуться ровно к выбранной карточке.
+  catalogScrollY=window.scrollY;
+
+  // Поиск закреплён только на экране каталога.
+  searchForm.hidden=true;
   document.getElementById("catalogSection").hidden=true;
 
   const detail=document.getElementById("productDetail");
   detail.hidden=false;
-history.pushState({page:"product"}, "");
+  history.pushState({page:"product"}, "");
   const image=document.getElementById("detailImage");
   image.src=product.image;
   image.alt=product.name;
@@ -753,9 +767,14 @@ const tgBackButton = window.Telegram.WebApp.BackButton;
 function showCatalog(){
   document.getElementById("productDetail").hidden=true;
   document.getElementById("catalogSection").hidden=false;
+  searchForm.hidden=false;
 
   tgBackButton.hide();
-  window.scrollTo(0,0);
+
+  // Восстанавливаем прежнюю позицию прокрутки после показа списка.
+  requestAnimationFrame(()=>{
+    window.scrollTo(0,catalogScrollY);
+  });
 }
 
 function openCatalogProduct(product){
