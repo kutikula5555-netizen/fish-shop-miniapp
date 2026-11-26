@@ -9,13 +9,13 @@
 <style>
 
 :root {
-  --deep: #082f35;
-  --teal: #14535a;
-  --accent: #d99a76;
-  --muted: var(--tg-theme-hint-color, #87938f);
-  --paper: var(--tg-theme-secondary-bg-color, #ffffff);
-  --ink: var(--tg-theme-text-color, #173238);
-  --shadow: 0 8px 24px rgba(0, 35, 40, 0.09);
+  --deep: #10383a;
+  --teal: #1e5b59;
+  --accent: #bd8865;
+  --muted: #78817b;
+  --paper: #fffdf8;
+  --ink: #1d302e;
+  --shadow: 0 12px 30px rgba(25, 49, 43, 0.075);
 }
 
 * {
@@ -605,6 +605,254 @@ footer {
   line-height: 1.55;
 }
 
+
+/* ── BRAND VISUAL REFRESH: premium seafood boutique ── */
+:root {
+  --canvas: #f5f2eb;
+  --line: rgba(29, 48, 46, .10);
+  --soft: #e9eee8;
+}
+html { scroll-padding-top: 12px; }
+body {
+  background: var(--tg-theme-bg-color, var(--canvas));
+  color: var(--ink);
+  letter-spacing: -.01em;
+}
+.app { max-width: 720px; }
+
+/* Hero brand panel */
+.header {
+  min-height: 156px;
+  padding: 27px 23px;
+  border-radius: 25px;
+  background:
+    radial-gradient(ellipse at 95% 8%, rgba(190, 143, 105, .24), transparent 33%),
+    radial-gradient(ellipse at 78% 110%, rgba(91, 139, 126, .22), transparent 42%),
+    linear-gradient(128deg, #0b3032 0%, #16494a 58%, #1c5552 100%);
+  box-shadow: 0 16px 34px rgba(8, 39, 39, .16);
+}
+.header::after {
+  width: 260px;
+  height: 260px;
+  right: -100px;
+  bottom: -165px;
+  border-color: rgba(232, 208, 177, .20);
+  box-shadow: 0 0 0 22px rgba(232, 208, 177, .045),
+              0 0 0 48px rgba(232, 208, 177, .03);
+}
+.brand { gap: 19px; }
+.brand-logo { width: 116px; max-height: 116px; }
+.brand-text h1 {
+  margin-bottom: 8px;
+  font-size: clamp(25px, 6vw, 32px);
+  letter-spacing: -.035em;
+  text-shadow: 0 2px 16px rgba(0,0,0,.12);
+}
+.brand-text p {
+  max-width: 230px;
+  color: rgba(250, 247, 239, .82);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+/* Search */
+.search-form {
+  top: 0;
+  margin: 17px 0 0;
+  padding: 0;
+  background: transparent;
+}
+.search-box {
+  min-height: 54px;
+  padding: 5px 6px 5px 18px;
+  border: 1px solid rgba(29, 48, 46, .09);
+  border-radius: 17px;
+  background: rgba(255, 253, 248, .96);
+  box-shadow: 0 7px 22px rgba(25, 49, 43, .055);
+}
+.search-box input { font-size: 13px; }
+.search-box input::placeholder { color: #9b9f98; }
+.search-button {
+  width: 42px; height: 42px; flex-basis: 42px;
+  border-radius: 13px;
+  background: var(--deep);
+}
+
+/* Section heading */
+.section-head { margin: 30px 2px 17px; }
+.section-head::before {
+  content: "СВЕЖИЙ ВЫБОР · ВКУС МОРЯ";
+  display: block;
+  margin-bottom: 8px;
+  color: var(--accent);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .17em;
+}
+.section-head h2 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(25px, 6vw, 30px);
+  font-weight: 700;
+  letter-spacing: -.045em;
+}
+.section-head p {
+  margin-top: 7px;
+  color: #858b83;
+  font-size: 12px;
+}
+
+/* Category chips */
+.filters {
+  gap: 8px;
+  padding: 2px 1px 15px;
+  margin-bottom: 4px;
+}
+.filter {
+  border: 1px solid rgba(29, 48, 46, .13);
+  border-radius: 999px;
+  padding: 10px 15px;
+  background: rgba(255, 253, 248, .76);
+  color: #4d5c55;
+  font-size: 11px;
+  font-weight: 650;
+  transition: all .18s ease;
+}
+.filter.active {
+  color: #fffdf8;
+  background: var(--deep);
+  border-color: var(--deep);
+  box-shadow: 0 5px 13px rgba(16, 56, 58, .16);
+}
+
+/* Product cards */
+.products { gap: 13px; }
+.card {
+  border: 1px solid rgba(29, 48, 46, .055);
+  border-radius: 17px;
+  background: #fffdf9;
+  box-shadow: 0 7px 22px rgba(25, 49, 43, .065);
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+.card:active {
+  transform: translateY(1px) scale(.985);
+  box-shadow: 0 3px 10px rgba(25, 49, 43, .07);
+}
+.photo-wrap { background: #e9e5dc; }
+.photo {
+  height: 172px;
+  object-fit: cover;
+  transition: transform .35s ease;
+}
+.category-tag {
+  left: 9px; top: 9px;
+  padding: 6px 9px;
+  border: 1px solid rgba(255,255,255,.55);
+  background: rgba(255, 253, 248, .94);
+  color: #28504a;
+  font-size: 9px;
+  letter-spacing: .01em;
+}
+.info { padding: 12px 12px 13px; }
+.info h3 {
+  margin-bottom: 6px;
+  color: #203633;
+  font-size: 13px;
+  line-height: 1.32;
+  font-weight: 750;
+  letter-spacing: -.025em;
+}
+.description {
+  margin-bottom: 12px;
+  color: #858b83;
+  font-size: 11px;
+  line-height: 1.48;
+  -webkit-line-clamp: 2;
+}
+.price {
+  color: #a46f4e;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -.025em;
+}
+
+/* Detail screen */
+.back-button {
+  border: 1px solid var(--line);
+  background: #fffdf8;
+  color: var(--deep);
+  border-radius: 999px;
+}
+.detail-photo-wrap { border-radius: 20px; }
+.detail-content h2 {
+  font-family: Georgia, "Times New Roman", serif;
+  letter-spacing: -.035em;
+}
+.detail-price { color: #a46f4e; }
+.detail-section, .stores {
+  border: 1px solid rgba(29, 48, 46, .06);
+  background: #fffdf8;
+  box-shadow: 0 8px 24px rgba(25, 49, 43, .05);
+}
+.detail-section h3, .stores h2 { color: #203633; }
+
+/* Address and useful pages */
+.info-card {
+  border: 1px solid rgba(29, 48, 46, .06);
+  background: #fffdf8;
+  box-shadow: 0 8px 24px rgba(25, 49, 43, .05);
+}
+.info-card h3 { color: #203633; font-family: Georgia, serif; font-size: 17px; }
+.info-card p { color: #78817b; }
+.pin { background: #edf0e9; color: var(--deep); }
+
+/* Quiet, theme-aware fixed navigation */
+.bottom-nav {
+  border-top: 1px solid color-mix(in srgb, var(--tg-theme-hint-color, #87938f) 18%, transparent);
+  background: color-mix(in srgb, var(--tg-theme-bg-color, #f4f6f3) 78%, transparent);
+  box-shadow: 0 -8px 24px rgba(0, 0, 0, .055);
+  -webkit-backdrop-filter: blur(18px) saturate(1.35);
+  backdrop-filter: blur(18px) saturate(1.35);
+}
+.bottom-nav button {
+  color: var(--tg-theme-hint-color, #858b83);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .005em;
+}
+.bottom-nav button .nav-icon {
+  display: block;
+  width: 21px;
+  height: 21px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.65;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform .18s ease;
+}
+.bottom-nav button.active {
+  color: var(--tg-theme-button-color, var(--teal));
+  background: color-mix(in srgb, var(--tg-theme-button-color, var(--teal)) 12%, transparent);
+}
+.bottom-nav button.active .nav-icon {
+  transform: translateY(-1px);
+}
+.bottom-nav button:focus-visible {
+  outline: 2px solid var(--tg-theme-button-color, var(--teal));
+  outline-offset: 2px;
+}
+footer { color: #989b92; }
+
+@media (max-width: 390px) {
+  .header { min-height: 142px; padding: 22px 16px; }
+  .brand-logo { width: 98px; max-height: 105px; }
+  .brand-text h1 { font-size: 24px; }
+  .photo { height: 145px; }
+  .info { padding: 11px 10px 12px; }
+  .info h3 { font-size: 12px; }
+  .price { font-size: 14px; }
+}
+
 </style>
 </head>
 <body>
@@ -716,13 +964,25 @@ footer {
 </main>
 <nav class="bottom-nav" id="bottomNav" aria-label="Основная навигация">
   <button type="button" class="active" data-tab="catalog" aria-current="page">
-    <span class="nav-icon" aria-hidden="true">▦</span><span>Каталог</span>
+    <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+      <rect x="3.5" y="4" width="17" height="16" rx="2.5"></rect>
+      <path d="M3.5 9.5h17M9 4v16"></path>
+    </svg>
+    <span>Каталог</span>
   </button>
   <button type="button" data-tab="addresses">
-    <span class="nav-icon" aria-hidden="true">⌖</span><span>Наши адреса</span>
+    <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M19 10.2c0 5-7 10.3-7 10.3S5 15.2 5 10.2a7 7 0 1 1 14 0Z"></path>
+      <circle cx="12" cy="10" r="2.3"></circle>
+    </svg>
+    <span>Наши адреса</span>
   </button>
   <button type="button" data-tab="useful">
-    <span class="nav-icon" aria-hidden="true">✦</span><span>Полезное</span>
+    <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M12 6.2C9.4 4.5 6.4 4.2 3.5 5v14c3-.8 6-.5 8.5 1.2 2.5-1.7 5.5-2 8.5-1.2V5c-2.9-.8-5.9-.5-8.5 1.2Z"></path>
+      <path d="M12 6.5v13.4"></path>
+    </svg>
+    <span>Полезное</span>
   </button>
 </nav>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>

@@ -28,7 +28,7 @@ html {
 
 body {
   margin: 0;
-  padding: 16px 15px 30px;
+  padding: 16px 15px calc(104px + env(safe-area-inset-bottom)) ;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
   background: var(--tg-theme-bg-color, #f4f6f3);
   color: var(--ink);
@@ -536,6 +536,75 @@ footer {
   }
 }
 
+
+/* НИЖНЯЯ НАВИГАЦИЯ */
+.bottom-nav {
+  position: fixed;
+  z-index: 100;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  width: min(100%, 760px);
+  padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  background: color-mix(in srgb, var(--tg-theme-bg-color, #f4f6f3) 92%, transparent);
+  border-top: 1px solid rgba(20, 83, 90, .10);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+.bottom-nav button {
+  min-width: 0;
+  min-height: 54px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  border: 0;
+  border-radius: 14px;
+  padding: 5px 4px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 10px;
+  font-weight: 650;
+  cursor: pointer;
+  transition: background .18s ease, color .18s ease;
+}
+.bottom-nav button .nav-icon {
+  font-size: 18px;
+  line-height: 1.1;
+}
+.bottom-nav button.active {
+  color: var(--deep);
+  background: rgba(20, 83, 90, .09);
+}
+.bottom-nav button:active { transform: scale(.97); }
+.content-page {
+  min-height: 45vh;
+  margin-top: 25px;
+}
+.content-page[hidden] { display: none !important; }
+.info-card {
+  margin-top: 13px;
+  padding: 17px;
+  border-radius: 17px;
+  background: var(--paper);
+  box-shadow: var(--shadow);
+}
+.info-card h3 {
+  margin: 0 0 7px;
+  font-size: 15px;
+}
+.info-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
 </style>
 </head>
 <body>
@@ -612,14 +681,50 @@ footer {
   </div>
 </section>
 
-<section class="stores" aria-labelledby="stores-title">
-<div class="stores-top"><div class="pin">📍</div><h2 id="stores-title">Наши магазины</h2></div>
-<p>Выберите удобный магазин — откроем его расположение на карте.</p>
-<div class="store-link"><span>Адреса магазинов скоро появятся</span><span>⌖</span></div>
-<p class="store-note">Добавим реальные адреса и ссылки на карты после уточнения.</p>
+<section class="content-page" id="addressesPage" hidden aria-labelledby="stores-title">
+  <div class="section-head">
+    <h2 id="stores-title">Наши адреса</h2>
+    <p>Выберите удобный магазин — подскажем, как нас найти</p>
+  </div>
+  <section class="stores">
+    <div class="stores-top"><div class="pin">📍</div><h2>Наши магазины</h2></div>
+    <p>Адреса и ссылки на карты появятся здесь.</p>
+    <div class="store-link"><span>Адреса магазинов скоро появятся</span><span>⌖</span></div>
+    <p class="store-note">Когда добавим адреса, здесь можно будет открыть маршрут до нужного магазина.</p>
+  </section>
+</section>
+
+<section class="content-page" id="usefulPage" hidden aria-labelledby="useful-title">
+  <div class="section-head">
+    <h2 id="useful-title">Полезное</h2>
+    <p>Небольшие подсказки о рыбе и морепродуктах</p>
+  </div>
+  <article class="info-card">
+    <h3>Как выбрать рыбу?</h3>
+    <p>Обращайте внимание на внешний вид, запах, условия хранения и дату изготовления. Если сомневаетесь в продукте, уточните информацию у продавца.</p>
+  </article>
+  <article class="info-card">
+    <h3>Как хранить покупку?</h3>
+    <p>Соблюдайте условия и сроки хранения, указанные на упаковке. После вскрытия упаковки следуйте рекомендациям производителя.</p>
+  </article>
+  <article class="info-card">
+    <h3>Есть вопросы?</h3>
+    <p>Уточните у продавца состав, происхождение, способ приготовления и рекомендации по хранению конкретного продукта.</p>
+  </article>
 </section>
 <footer>Чёрная треска · Рыба и морепродукты</footer>
 </main>
+<nav class="bottom-nav" id="bottomNav" aria-label="Основная навигация">
+  <button type="button" class="active" data-tab="catalog" aria-current="page">
+    <span class="nav-icon" aria-hidden="true">▦</span><span>Каталог</span>
+  </button>
+  <button type="button" data-tab="addresses">
+    <span class="nav-icon" aria-hidden="true">⌖</span><span>Наши адреса</span>
+  </button>
+  <button type="button" data-tab="useful">
+    <span class="nav-icon" aria-hidden="true">✦</span><span>Полезное</span>
+  </button>
+</nav>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SUPABASE_URL = "https://fzxjhxphqhmiusyshfrd.supabase.co";
@@ -727,6 +832,39 @@ searchForm.addEventListener("submit",event=>{
 });
 
 let catalogScrollY=0;
+let activeTab="catalog";
+
+function setActiveTab(tab) {
+  activeTab=tab;
+  const catalog=document.getElementById("catalogSection");
+  const addresses=document.getElementById("addressesPage");
+  const useful=document.getElementById("usefulPage");
+  const detail=document.getElementById("productDetail");
+  const nav=document.getElementById("bottomNav");
+
+  detail.hidden=true;
+  catalog.hidden=tab!=="catalog";
+  addresses.hidden=tab!=="addresses";
+  useful.hidden=tab!=="useful";
+  searchForm.hidden=tab!=="catalog";
+  nav.hidden=false;
+
+  nav.querySelectorAll("button[data-tab]").forEach(button=>{
+    const selected=button.dataset.tab===tab;
+    button.classList.toggle("active",selected);
+    if(selected) button.setAttribute("aria-current","page");
+    else button.removeAttribute("aria-current");
+  });
+
+  tgBackButton?.hide();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+document.getElementById("bottomNav").addEventListener("click",event=>{
+  const button=event.target.closest("button[data-tab]");
+  if(!button) return;
+  setActiveTab(button.dataset.tab);
+});
 
 function openProduct(product){
   // Запоминаем позицию списка, чтобы вернуться ровно к выбранной карточке.
@@ -735,6 +873,7 @@ function openProduct(product){
   // Поиск закреплён только на экране каталога.
   searchForm.hidden=true;
   document.getElementById("catalogSection").hidden=true;
+  document.getElementById("bottomNav").hidden=true;
 
   const detail=document.getElementById("productDetail");
   detail.hidden=false;
@@ -775,6 +914,14 @@ function showCatalog(){
   document.getElementById("productDetail").hidden=true;
   document.getElementById("catalogSection").hidden=false;
   searchForm.hidden=false;
+  document.getElementById("bottomNav").hidden=false;
+  activeTab="catalog";
+  document.querySelectorAll("#bottomNav button[data-tab]").forEach(button=>{
+    const selected=button.dataset.tab==="catalog";
+    button.classList.toggle("active",selected);
+    if(selected) button.setAttribute("aria-current","page");
+    else button.removeAttribute("aria-current");
+  });
 
   tgBackButton?.hide();
 
