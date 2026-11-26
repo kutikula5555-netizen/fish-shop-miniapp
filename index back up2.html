@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#092f35">
+<title>Чёрная треска — рыбный магазин</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+
+:root {
+  --deep: #082f35;
+  --teal: #14535a;
+  --accent: #d99a76;
+  --muted: var(--tg-theme-hint-color, #87938f);
+  --paper: var(--tg-theme-secondary-bg-color, #ffffff);
+  --ink: var(--tg-theme-text-color, #173238);
+  --shadow: 0 8px 24px rgba(0, 35, 40, 0.09);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  padding: 16px 15px 30px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  background: var(--tg-theme-bg-color, #f4f6f3);
+  color: var(--ink);
+}
+
+.app {
+  max-width: 760px;
+  margin: auto;
+}
+
+/* ШАПКА И ЛОГОТИП */
+
+.header {
+  position: relative;
+  overflow: hidden;
+  padding: 25px 22px;
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 90% 10%, #27636a 0%, transparent 38%),
+    linear-gradient(125deg, #062c32, #10474d);
+  color: #ffffff;
+  box-shadow: var(--shadow);
+}
+
+.header::after {
+  content: "";
+  position: absolute;
+  width: 210px;
+  height: 210px;
+  right: -90px;
+  bottom: -125px;
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 50%;
+  box-shadow: 0 0 0 20px rgba(255,255,255,.035),
+              0 0 0 42px rgba(255,255,255,.025);
+  pointer-events: none;
+}
+
+.brand {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.brand-logo {
+  display: block;
+  width: 125px;
+  max-height: 125px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.brand-text {
+  min-width: 0;
+}
+
+.brand-text h1 {
+  margin: 0 0 10px;
+  color: #ffffff;
+  font-family: Georgia, serif;
+  font-size: clamp(23px, 6vw, 31px);
+  line-height: 1.1;
+}
+
+.brand-text p {
+  margin: 0;
+  color: #e5efeb;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* ЗАГОЛОВОК КАТАЛОГА */
+
+.section-head {
+  margin: 27px 1px 15px;
+}
+
+.section-head h2 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 23px;
+  letter-spacing: -.035em;
+}
+
+.section-head p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* ФИЛЬТРЫ */
+
+.filters {
+  display: flex;
+  gap: 9px;
+  overflow-x: auto;
+  padding: 2px 1px 13px;
+  margin: 0 -1px 7px;
+  scrollbar-width: none;
+}
+
+.filters::-webkit-scrollbar {
+  display: none;
+}
+
+.filter {
+  flex: 0 0 auto;
+  border: 1px solid var(--tg-theme-hint-color, #dce4e0);
+  border-radius: 999px;
+  padding: 11px 15px;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.filter.active {
+  color: #ffffff;
+  background: var(--deep);
+  border-color: var(--deep);
+  box-shadow: 0 5px 14px rgba(8,47,53,.2);
+}
+
+
+
+/* ПОИСК ПО АССОРТИМЕНТУ */
+.search-form {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  margin: 18px -1px 0;
+  padding: 8px 1px;
+  background: var(--tg-theme-bg-color, #f4f6f3);
+}
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
+.search-box {
+  display: flex; align-items: center; gap: 8px; min-height: 52px;
+  padding: 5px 6px 5px 16px; border: 1px solid #dce4e0;
+  border-radius: 16px; background: var(--paper); box-shadow: var(--shadow);
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+.search-box:focus-within {
+  border-color: var(--teal); box-shadow: 0 0 0 3px rgba(20, 83, 90, .10);
+}
+.search-box input {
+  flex: 1; min-width: 0; border: 0; outline: 0; background: transparent;
+  color: var(--ink); font: inherit; font-size: 14px;
+}
+.search-box input::placeholder { color: var(--muted); opacity: 1; }
+.search-button {
+  width: 40px; height: 40px; flex: 0 0 40px; display: grid; place-items: center;
+  border: 0; border-radius: 12px; background: var(--deep); color: #fff; cursor: pointer;
+}
+.search-button:active { transform: scale(.96); }
+.search-button svg {
+  width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 2;
+  stroke-linecap: round;
+}
+
+/* КАРТОЧКИ ТОВАРОВ */
+
+.products {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.card {
+  min-width: 0;
+  overflow: hidden;
+  border-radius: 20px;
+  background: var(--paper);
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.card:active {
+  transform: scale(.98);
+}
+
+.photo-wrap {
+  position: relative;
+  overflow: hidden;
+  background: #e9e2d8;
+}
+
+.photo {
+  display: block;
+  width: 100%;
+  height: 165px;
+  object-fit: cover;
+}
+
+.category-tag {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  max-width: calc(100% - 20px);
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.94);
+  color: #10474d;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.info {
+  padding: 13px;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+.info h3 {
+  margin: 0 0 6px;
+  color: var(--ink);
+  font-size: 15px;
+  line-height: 1.3;
+  font-weight: 750;
+}
+
+.description {
+  margin: 0 0 13px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.price {
+  margin-top: auto;
+  color: var(--tg-theme-link-color, #14665b);
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -.02em;
+}
+
+.origin {
+  display: none;
+}
+
+/* ПОЛНОЭКРАННАЯ КАРТОЧКА ТОВАРА */
+
+[hidden] {
+  display: none !important;
+}
+
+.product-detail {
+  margin-top: 20px;
+  animation: detailAppear .25s ease;
+}
+
+@keyframes detailAppear {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.back-button {
+  display: inline-flex;
+  align-items: center;
+  border: none;
+  border-radius: 12px;
+  padding: 11px 15px;
+  margin-bottom: 15px;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.detail-photo-wrap {
+  overflow: hidden;
+  border-radius: 22px;
+  background: #e9e2d8;
+}
+
+.detail-photo {
+  display: block;
+  width: 100%;
+  max-height: 370px;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+
+.detail-content {
+  padding: 19px 4px;
+}
+
+.detail-category {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.detail-content h2 {
+  margin: 9px 0;
+  color: var(--ink);
+  font-size: 24px;
+  line-height: 1.25;
+}
+
+.detail-price {
+  margin: 13px 0 24px;
+  color: var(--tg-theme-link-color, #14665b);
+  font-size: 23px;
+  font-weight: 800;
+}
+
+.detail-section {
+  margin-top: 23px;
+  padding: 17px;
+  border-radius: 17px;
+  background: var(--paper);
+  box-shadow: var(--shadow);
+}
+
+.detail-section h3 {
+  margin: 0 0 10px;
+  color: var(--ink);
+  font-size: 16px;
+}
+
+.detail-section p,
+.detail-section li {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.detail-section p {
+  margin: 0;
+}
+
+.detail-section ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+/* МАГАЗИНЫ */
+
+.stores {
+  margin-top: 30px;
+  padding: 21px;
+  border-radius: 21px;
+  background: var(--paper);
+  box-shadow: var(--shadow);
+}
+
+.stores-top {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin-bottom: 7px;
+}
+
+.pin {
+  width: 35px;
+  height: 35px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: rgba(20,83,90,.1);
+  font-size: 17px;
+}
+
+.stores h2 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 20px;
+}
+
+.stores p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.store-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 15px;
+  padding: 13px 14px;
+  border-radius: 14px;
+  text-decoration: none;
+  color: var(--ink);
+  background: var(--tg-theme-bg-color, #f1f4f1);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.store-note {
+  margin-top: 12px !important;
+  font-size: 11px !important;
+}
+
+footer {
+  padding: 24px 0 5px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.status {
+  grid-column: 1 / -1;
+  padding: 28px 12px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* АДАПТАЦИЯ */
+
+@media (min-width: 600px) {
+  body {
+    padding: 24px;
+  }
+
+  .header {
+    padding: 32px;
+  }
+
+  .brand-logo {
+    width: 150px;
+    max-height: 150px;
+  }
+
+  .photo {
+    height: 210px;
+  }
+
+  .info {
+    padding: 17px;
+  }
+
+  .info h3 {
+    font-size: 17px;
+  }
+
+  .description {
+    font-size: 13px;
+  }
+
+  .products {
+    gap: 18px;
+  }
+}
+
+@media (max-width: 390px) {
+  body {
+    padding: 10px;
+  }
+
+  .header {
+    padding: 20px 16px;
+  }
+
+  .brand {
+    gap: 12px;
+  }
+
+  .brand-logo {
+    width: 100px;
+    max-height: 110px;
+  }
+
+  .brand-text h1 {
+    font-size: 23px;
+  }
+
+  .photo {
+    height: 125px;
+  }
+
+  .info {
+    padding: 10px;
+  }
+
+  .info h3 {
+    font-size: 13px;
+  }
+
+  .price {
+    font-size: 15px;
+  }
+}
+
+</style>
+</head>
+<body>
+<main class="app">
+  <header class="header">
+  <div class="brand">
+    <img
+      src="./chernaya_treska_logo_white.png"
+      alt="Чёрная треска — коптильня"
+      class="brand-logo"
+    >
+
+    <div class="brand-text">
+      <h1>Чёрная треска</h1>
+      <p>Рыба и морепродукты для вашего стола</p>
+    </div>
+  </div>
+</header>
+
+<form class="search-form" id="searchForm" role="search">
+  <label class="visually-hidden" for="catalogSearch">Поиск по ассортименту</label>
+  <div class="search-box">
+    <input id="catalogSearch" type="search" placeholder="Найти рыбу или морепродукты..." autocomplete="off">
+    <button class="search-button" type="submit" aria-label="Найти товары">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="10.8" cy="10.8" r="6.8"></circle>
+        <path d="m16 16 5 5"></path>
+      </svg>
+    </button>
+  </div>
+</form>
+
+<section id="catalogSection" aria-labelledby="catalog-title">
+<div class="section-head"><h2 id="catalog-title">Наш ассортимент</h2><p>Выбирайте деликатесы к своему столу</p></div>
+<nav class="filters" id="filters" aria-label="Категории товаров"></nav>
+<div class="products" id="products"><div class="status">Загружаем ассортимент…</div></div>
+</section>
+  
+<section class="product-detail" id="productDetail" hidden>
+  <button class="back-button" id="backToCatalog" type="button">
+    ← Назад к ассортименту
+  </button>
+
+  <div class="detail-photo-wrap">
+    <img id="detailImage" class="detail-photo" src="" alt="">
+  </div>
+
+  <div class="detail-content">
+    <span class="detail-category" id="detailCategory"></span>
+
+    <h2 id="detailName"></h2>
+
+    <div class="detail-price" id="detailPrice"></div>
+
+    <div class="detail-section">
+      <h3>О товаре</h3>
+      <p id="detailDescription"></p>
+    </div>
+
+    <div class="detail-section" id="detailUsageBlock" hidden>
+      <h3>Как лучше использовать</h3>
+      <ul id="detailUsage"></ul>
+    </div>
+
+    <div class="detail-section" id="detailOriginBlock" hidden>
+      <h3>Происхождение</h3>
+      <p id="detailOrigin"></p>
+    </div>
+
+    <div class="detail-section">
+      <h3>Где купить</h3>
+      <p>Адреса магазинов и ссылки на карты добавим после уточнения.</p>
+    </div>
+  </div>
+</section>
+
+<section class="stores" aria-labelledby="stores-title">
+<div class="stores-top"><div class="pin">📍</div><h2 id="stores-title">Наши магазины</h2></div>
+<p>Выберите удобный магазин — откроем его расположение на карте.</p>
+<div class="store-link"><span>Адреса магазинов скоро появятся</span><span>⌖</span></div>
+<p class="store-note">Добавим реальные адреса и ссылки на карты после уточнения.</p>
+</section>
+<footer>Чёрная треска · Рыба и морепродукты</footer>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = "https://fzxjhxphqhmiusyshfrd.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_3oAm9NcSbWmBVFuhOumtxg_ul-q58Gz";
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+
+const productsContainer=document.getElementById("products");
+const filtersContainer=document.getElementById("filters");
+const searchForm=document.getElementById("searchForm");
+const searchInput=document.getElementById("catalogSearch");
+let products=[];
+let activeCategory="Все";
+const categoryIcons={"Морепродукты":"🦐","Копчёная рыба":"♨","Слабосолёная рыба":"🐟","Икра и деликатесы":"🟠"};
+function formatPrice(product){
+ const amount=new Intl.NumberFormat("ru-RU",{maximumFractionDigits:2}).format(product.price);
+ return `${amount} ₽ / ${product.unit}`;
+}
+function createFilters(){
+  const categories=["Все",...new Set(products.map(p=>p.category))];
+  filtersContainer.innerHTML="";
+  categories.forEach(category=>{
+    const button=document.createElement("button");
+    button.type="button";
+    button.className="filter"+(category==="Все"?" active":"");
+    button.textContent=category==="Все"?"Все":`${categoryIcons[category]||"•"}  ${category}`;
+    button.addEventListener("click",()=>{
+      activeCategory=category;
+      filtersContainer.querySelectorAll(".filter").forEach(btn=>btn.classList.remove("active"));
+      button.classList.add("active");
+      showProducts();
+    });
+    filtersContainer.appendChild(button);
+  });
+}
+
+function showProducts(){
+  const query=searchInput.value.trim().toLocaleLowerCase("ru");
+  const filtered=products.filter(product=>{
+    const matchesCategory=activeCategory==="Все"||product.category===activeCategory;
+    const searchableText=[
+      product.name, product.category, product.description,
+      product.shortDescription, product.origin
+    ].filter(Boolean).join(" ").toLocaleLowerCase("ru");
+    return matchesCategory && (!query || searchableText.includes(query));
+  });
+
+  productsContainer.innerHTML="";
+  if(!filtered.length){
+    productsContainer.innerHTML='<div class="status">Ничего не найдено. Попробуйте изменить запрос.</div>';
+    return;
+  }
+
+  filtered.forEach(product=>{
+    const card=document.createElement("article");
+    card.className="card";
+    card.addEventListener("click",()=>openCatalogProduct(product));
+
+    const photoWrap=document.createElement("div");
+    photoWrap.className="photo-wrap";
+    const image=document.createElement("img");
+    image.className="photo";
+    image.src=product.image;
+    image.alt=product.name;
+    image.loading="lazy";
+    image.onerror=()=>{image.style.display="none";};
+
+    const tag=document.createElement("span");
+    tag.className="category-tag";
+    tag.textContent=product.category;
+    photoWrap.append(image,tag);
+
+    const info=document.createElement("div");
+    info.className="info";
+    const name=document.createElement("h3");
+    name.textContent=product.name;
+    const description=document.createElement("p");
+    description.className="description";
+    description.textContent=product.shortDescription||product.description;
+    const price=document.createElement("div");
+    price.className="price";
+    price.textContent=formatPrice(product);
+    info.append(name,description,price);
+
+    if(product.origin){
+      const origin=document.createElement("div");
+      origin.className="origin";
+      origin.textContent="📍 "+product.origin;
+      info.appendChild(origin);
+    }
+    card.append(photoWrap,info);
+    productsContainer.appendChild(card);
+  });
+}
+
+searchForm.addEventListener("submit",event=>{
+  event.preventDefault();
+  activeCategory="Все";
+  filtersContainer.querySelectorAll(".filter").forEach(button=>{
+    button.classList.toggle("active",button.textContent==="Все");
+  });
+  showProducts();
+  productsContainer.scrollIntoView({behavior:"smooth",block:"start"});
+});
+
+let catalogScrollY=0;
+
+function openProduct(product){
+  // Запоминаем позицию списка, чтобы вернуться ровно к выбранной карточке.
+  catalogScrollY=window.scrollY;
+
+  // Поиск закреплён только на экране каталога.
+  searchForm.hidden=true;
+  document.getElementById("catalogSection").hidden=true;
+
+  const detail=document.getElementById("productDetail");
+  detail.hidden=false;
+  history.pushState({page:"product"}, "");
+  const image=document.getElementById("detailImage");
+  image.src=product.image;
+  image.alt=product.name;
+
+  document.getElementById("detailCategory").textContent=product.category;
+  document.getElementById("detailName").textContent=product.name;
+  document.getElementById("detailPrice").textContent=formatPrice(product);
+  document.getElementById("detailDescription").textContent=product.description;
+
+  const originBlock=document.getElementById("detailOriginBlock");
+  originBlock.hidden=!product.origin;
+
+  if(product.origin){
+    document.getElementById("detailOrigin").textContent=product.origin;
+  }
+
+  const usageBlock=document.getElementById("detailUsageBlock");
+  usageBlock.hidden=!product.usage || !product.usage.length;
+
+  if(product.usage){
+    const usageList=document.getElementById("detailUsage");
+    usageList.innerHTML="";
+    product.usage.forEach(item=>{
+      const li=document.createElement("li");
+      li.textContent=item;
+      usageList.appendChild(li);
+    });
+  }
+
+  window.scrollTo(0,0);
+}
+const tgBackButton = window.Telegram.WebApp.BackButton;
+function showCatalog(){
+  document.getElementById("productDetail").hidden=true;
+  document.getElementById("catalogSection").hidden=false;
+  searchForm.hidden=false;
+
+  tgBackButton.hide();
+
+  // Восстанавливаем прежнюю позицию прокрутки после показа списка.
+  requestAnimationFrame(()=>{
+    window.scrollTo(0,catalogScrollY);
+  });
+}
+
+function openCatalogProduct(product){
+  openProduct(product);
+  tgBackButton.show();
+}
+
+document.getElementById("backToCatalog").addEventListener("click",()=>{
+  showCatalog();
+});
+
+tgBackButton.onClick(()=>{
+  showCatalog();
+});
+async function loadProducts(){
+  productsContainer.innerHTML='<div class="status">Загружаем ассортимент…</div>';
+
+  try {
+    const { data, error } = await supabaseClient
+      .from("products")
+      .select("*")
+      .eq("is_published", true)
+      .order("sort_order", { ascending: true })
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+
+    // Преобразуем поля базы данных в формат, который использует интерфейс.
+    products = (data || []).map(product => ({
+      id: product.id,
+      name: product.name,
+      category: product.category,
+      description: product.description || "",
+      shortDescription: product.short_description || product.description || "",
+      origin: product.origin || "",
+      price: Number(product.price),
+      unit: product.unit || "100 г",
+      image: product.image_url || "",
+      usage: Array.isArray(product.usage) ? product.usage : []
+    }));
+
+    createFilters();
+    showProducts();
+
+    if (!products.length) {
+      productsContainer.innerHTML =
+        '<div class="status">В базе пока нет опубликованных товаров. На следующем этапе перенесём сюда существующий ассортимент.</div>';
+    }
+  } catch(error) {
+    productsContainer.innerHTML =
+      '<div class="status">Не удалось загрузить ассортимент из базы. Проверьте подключение и политики доступа.</div>';
+    console.error("Supabase products error:", error);
+  }
+}
+loadProducts();
+if(window.Telegram?.WebApp){Telegram.WebApp.ready();Telegram.WebApp.expand();}
+</script>
+</body>
+</html>

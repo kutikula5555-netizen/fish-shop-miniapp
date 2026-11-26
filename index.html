@@ -635,7 +635,9 @@ let activeCategory="Все";
 const categoryIcons={"Морепродукты":"🦐","Копчёная рыба":"♨","Слабосолёная рыба":"🐟","Икра и деликатесы":"🟠"};
 function formatPrice(product){
  const amount=new Intl.NumberFormat("ru-RU",{maximumFractionDigits:2}).format(product.price);
- return `${amount} ₽ / ${product.unit}`;
+ const currencyLabels={RUB:"₽",VND:"₫",USD:"$"};
+ const currency=currencyLabels[product.currency] || product.currency || "₽";
+ return `${amount} ${currency} / ${product.unit}`;
 }
 function createFilters(){
   const categories=["Все",...new Set(products.map(p=>p.category))];
@@ -768,13 +770,13 @@ function openProduct(product){
 
   window.scrollTo(0,0);
 }
-const tgBackButton = window.Telegram.WebApp.BackButton;
+const tgBackButton = window.Telegram?.WebApp?.BackButton || null;
 function showCatalog(){
   document.getElementById("productDetail").hidden=true;
   document.getElementById("catalogSection").hidden=false;
   searchForm.hidden=false;
 
-  tgBackButton.hide();
+  tgBackButton?.hide();
 
   // Восстанавливаем прежнюю позицию прокрутки после показа списка.
   requestAnimationFrame(()=>{
@@ -784,14 +786,14 @@ function showCatalog(){
 
 function openCatalogProduct(product){
   openProduct(product);
-  tgBackButton.show();
+  tgBackButton?.show();
 }
 
 document.getElementById("backToCatalog").addEventListener("click",()=>{
   showCatalog();
 });
 
-tgBackButton.onClick(()=>{
+tgBackButton?.onClick(()=>{
   showCatalog();
 });
 async function loadProducts(){
@@ -817,6 +819,7 @@ async function loadProducts(){
       origin: product.origin || "",
       price: Number(product.price),
       unit: product.unit || "100 г",
+      currency: product.currency || "RUB",
       image: product.image_url || "",
       usage: Array.isArray(product.usage) ? product.usage : []
     }));
