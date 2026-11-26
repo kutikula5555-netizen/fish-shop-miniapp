@@ -4,13 +4,19 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#102b35">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Чёрная треска">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icons/icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png">
   <title>Чёрная треска — управление каталогом</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#172b32;background:#f3f6f5}
     *{box-sizing:border-box} body{margin:0} button,input,textarea,select{font:inherit}
     .top{background:#102b35;color:white;padding:20px 16px}
-    .top-inner,.wrap{max-width:920px;margin:auto}.top h1{font-size:20px;margin:0 0 4px}.top p{margin:0;color:#c3d4d7;font-size:13px}
+    .top-inner,.wrap{max-width:920px;margin:auto}.top h1{font-size:20px;margin:0 0 4px}.top p{margin:0;color:#c3d4d7;font-size:13px}.top-row{display:flex;align-items:center;justify-content:space-between;gap:12px}.install-btn{display:none;background:#e7f0ed;color:#123d3a;padding:9px 12px;font-size:12px;min-height:38px;white-space:nowrap}
     .wrap{padding:18px 14px 48px}.panel{background:white;border:1px solid #e0e8e6;border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 3px 14px #16313a0a}
     h2{font-size:17px;margin:0 0 14px}.muted{color:#66777b;font-size:13px}.hidden{display:none!important}
     label{display:block;font-size:13px;font-weight:650;margin:12px 0 6px}
@@ -30,7 +36,7 @@
   </style>
 </head>
 <body>
-  <header class="top"><div class="top-inner"><h1>Чёрная треска</h1><p>Панель управления каталогом</p></div></header>
+  <header class="top"><div class="top-inner top-row"><div><h1>Чёрная треска</h1><p>Панель управления каталогом</p></div><button class="install-btn" id="installBtn" type="button">Установить приложение</button></div></header>
   <main class="wrap">
     <section id="loginPanel" class="panel">
       <h2>Вход владельца</h2>
@@ -287,5 +293,39 @@
   })();
 })();
 </script>
+
+<script>
+(() => {
+  const installButton = document.getElementById('installBtn');
+  let installPrompt = null;
+
+  window.addEventListener('beforeinstallprompt', event => {
+    event.preventDefault();
+    installPrompt = event;
+    if (installButton) installButton.style.display = 'inline-flex';
+  });
+
+  installButton?.addEventListener('click', async () => {
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    await installPrompt.userChoice;
+    installPrompt = null;
+    installButton.style.display = 'none';
+  });
+
+  window.addEventListener('appinstalled', () => {
+    if (installButton) installButton.style.display = 'none';
+    installPrompt = null;
+  });
+
+  if ('serviceWorker' in navigator && location.protocol === 'https:') {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js', { scope: './' })
+        .catch(error => console.error('Не удалось зарегистрировать Service Worker:', error));
+    });
+  }
+})();
+</script>
+
 </body>
 </html>
