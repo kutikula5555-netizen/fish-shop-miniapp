@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#102b35">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Чёрная треска">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icons/icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png">
+  <title>Чёрная треска — управление каталогом</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#172b32;background:#f3f6f5}
+    *{box-sizing:border-box} body{margin:0} button,input,textarea,select{font:inherit}
+    .top{background:#102b35;color:white;padding:20px 16px}
+    .top-inner,.wrap{max-width:920px;margin:auto}.top h1{font-size:20px;margin:0 0 4px}.top p{margin:0;color:#c3d4d7;font-size:13px}.top-row{display:flex;align-items:center;justify-content:space-between;gap:12px}.install-btn{display:none;background:#e7f0ed;color:#123d3a;padding:9px 12px;font-size:12px;min-height:38px;white-space:nowrap}
+    .wrap{padding:18px 14px 48px}.panel{background:white;border:1px solid #e0e8e6;border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 3px 14px #16313a0a}
+    h2{font-size:17px;margin:0 0 14px}.muted{color:#66777b;font-size:13px}.hidden{display:none!important}
+    label{display:block;font-size:13px;font-weight:650;margin:12px 0 6px}
+    input,textarea,select{width:100%;border:1px solid #ccd8d6;border-radius:10px;padding:12px;background:#fff;color:#172b32;min-height:44px}
+    textarea{min-height:92px;resize:vertical} input:focus,textarea:focus,select:focus{outline:2px solid #a8c9c3;border-color:#4d8279}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+    button{border:0;border-radius:10px;padding:11px 15px;font-weight:700;cursor:pointer;min-height:44px}
+    button:disabled{opacity:.55;cursor:wait}.primary{background:#176b5d;color:white}.secondary{background:#e8efed;color:#183c3b}.danger{background:#fff0ed;color:#a83d2d}
+    .toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.toolbar input{flex:1;min-width:180px}
+    .products{display:grid;gap:10px}.product{display:grid;grid-template-columns:76px 1fr auto;gap:12px;align-items:center;border:1px solid #e5ecea;border-radius:12px;padding:10px}
+    .product img{width:76px;height:76px;object-fit:cover;border-radius:9px;background:#eef2f1}.product h3{font-size:14px;margin:0 0 5px}.product p{font-size:12px;color:#65777a;margin:0 0 4px}.product .price{font-weight:750;color:#183f3a}
+    .product .item-actions{display:flex;gap:6px;flex-direction:column}.small{padding:8px 10px;min-height:36px;font-size:12px}
+    .status{padding:10px 12px;border-radius:10px;background:#edf5f2;color:#245b4e;font-size:13px;margin:10px 0}.status.error{background:#fff0ed;color:#9b3328}
+    .check{display:flex;align-items:center;gap:9px;margin-top:14px}.check input{width:18px;height:18px;min-height:auto}
+    .preview{width:100%;max-height:190px;object-fit:contain;background:#f1f4f3;border-radius:10px;margin-top:10px}
+    @media(max-width:560px){.grid{grid-template-columns:1fr}.product{grid-template-columns:64px 1fr}.product img{width:64px;height:64px}.product .item-actions{grid-column:1/-1;flex-direction:row}.product .item-actions button{flex:1}.panel{padding:14px}}
+  </style>
+</head>
+<body>
+  <header class="top"><div class="top-inner top-row"><div><h1>Чёрная треска</h1><p>Панель управления каталогом</p></div><button class="install-btn" id="installBtn" type="button">Установить приложение</button></div></header>
+  <main class="wrap">
+    <section id="loginPanel" class="panel">
+      <h2>Вход владельца</h2>
+      <p class="muted">Войдите с учётной записью владельца магазина.</p>
+      <form id="loginForm">
+        <label for="email">Электронная почта</label><input id="email" type="email" autocomplete="username" required>
+        <label for="password">Пароль</label><input id="password" type="password" autocomplete="current-password" required>
+        <div class="actions"><button class="primary" id="loginBtn" type="submit">Войти</button></div>
+      </form>
+      <div id="loginStatus" aria-live="polite"></div>
+      <button class="secondary" id="forgotPasswordBtn" type="button">Забыли пароль?</button>
+    </section>
+
+    <section id="recoveryPanel" class="panel hidden">
+      <h2>Задать новый пароль</h2>
+      <p class="muted">Введите новый пароль для учётной записи владельца.</p>
+      <form id="recoveryForm">
+        <label for="newPassword">Новый пароль</label><input id="newPassword" type="password" autocomplete="new-password" minlength="10" required>
+        <label for="confirmPassword">Повторите пароль</label><input id="confirmPassword" type="password" autocomplete="new-password" minlength="10" required>
+        <div class="actions"><button class="primary" id="recoverySaveBtn" type="submit">Сохранить пароль</button></div>
+      </form>
+      <div id="recoveryStatus" aria-live="polite"></div>
+    </section>
+
+    <section id="appPanel" class="hidden">
+      <div class="panel">
+        <div class="toolbar" style="justify-content:space-between">
+          <div><h2 style="margin:0 0 4px">Товары</h2><div class="muted" id="countLabel">Загрузка…</div></div>
+          <button class="secondary" id="logoutBtn" type="button">Выйти</button>
+        </div>
+        <div class="toolbar" style="margin-top:14px">
+          <input id="searchInput" type="search" placeholder="Найти товар…" aria-label="Найти товар">
+          <button class="primary" id="newBtn" type="button">＋ Добавить товар</button>
+        </div>
+      </div>
+      <div id="listStatus" aria-live="polite"></div>
+      <div id="productList" class="products"></div>
+      <section id="editor" class="panel hidden" style="margin-top:16px">
+        <h2 id="editorTitle">Новый товар</h2>
+        <form id="productForm">
+          <input type="hidden" id="productId">
+          <div class="grid">
+            <div><label for="name">Название *</label><input id="name" required maxlength="180"></div>
+            <div><label for="category">Категория *</label><input id="category" required maxlength="80" placeholder="Например, Рыба"></div>
+            <div><label for="price">Цена *</label><input id="price" type="number" min="0" step="0.01" required></div>
+            <div><label for="unit">Единица измерения *</label><input id="unit" required value="100 г" maxlength="40"></div>
+            <div><label for="currency">Валюта</label><select id="currency"><option value="RUB">RUB — рубли</option><option value="VND">VND — донги</option><option value="USD">USD — доллары</option></select></div>
+            <div><label for="origin">Происхождение</label><input id="origin" maxlength="120" placeholder="Например, Дальний Восток"></div>
+          </div>
+          <label for="shortDescription">Краткое описание</label><textarea id="shortDescription" rows="2"></textarea>
+          <label for="description">Полное описание</label><textarea id="description" rows="4"></textarea>
+          <label for="imageFile">Фотография товара</label><input id="imageFile" type="file" accept="image/jpeg,image/png,image/webp">
+          <p class="muted">Форматы JPG, PNG или WebP. Максимальный размер — 5 МБ. Если фото не выбирать, сохранится прежнее.</p>
+          <img id="imagePreview" class="preview hidden" alt="Предпросмотр фотографии">
+          <label class="check"><input id="published" type="checkbox" checked><span>Опубликован в каталоге</span></label>
+          <div class="actions">
+            <button class="primary" id="saveBtn" type="submit">Сохранить товар</button>
+            <button class="secondary" id="cancelBtn" type="button">Отмена</button>
+          </div>
+          <div id="formStatus" aria-live="polite"></div>
+        </form>
+      </section>
+    </section>
+  </main>
+
+<script>
+(() => {
+  const SUPABASE_URL = "https://fzxjhxphqhmiusyshfrd.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_3oAm9NcSbWmBVFuhOumtxg_ul-q58Gz";
+  const OWNER_UID = "ec14c1b6-be3c-42bf-a145-1a5ce465d0f3";
+  const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const $ = id => document.getElementById(id);
+  let products = [];
+
+  function message(target, text, error=false) {
+    target.innerHTML = text ? `<div class="status${error ? ' error' : ''}">${escapeHtml(text)}</div>` : '';
+  }
+  function escapeHtml(value='') {
+    return String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  function money(p) {
+    const n = Number(p.price).toLocaleString('ru-RU', {maximumFractionDigits:2});
+    return `${n} ${p.currency || 'RUB'} / ${p.unit || '100 г'}`;
+  }
+  function showApp(on) {
+    $('loginPanel').classList.toggle('hidden', on);
+    $('appPanel').classList.toggle('hidden', !on);
+  }
+  function showRecovery(on) {
+    $('loginPanel').classList.toggle('hidden', on);
+    $('appPanel').classList.add('hidden');
+    $('recoveryPanel').classList.toggle('hidden', !on);
+  }
+  async function verifySession() {
+    const {data:{session}} = await db.auth.getSession();
+    if (!session) { showApp(false); return; }
+    const {data:{user}, error} = await db.auth.getUser();
+    if (error || !user || user.id !== OWNER_UID) {
+      await db.auth.signOut();
+      showApp(false);
+      message($('loginStatus'), 'Эта учётная запись не имеет доступа к панели владельца.', true);
+      return;
+    }
+    showApp(true);
+    await loadProducts();
+  }
+  async function loadProducts() {
+    message($('listStatus'), 'Загружаем товары…');
+    const {data, error} = await db.from('products').select('*').order('sort_order', {ascending:true}).order('created_at', {ascending:false});
+    if (error) { message($('listStatus'), `Не удалось загрузить товары: ${error.message}`, true); return; }
+    products = data || [];
+    renderProducts();
+    message($('listStatus'), '');
+  }
+  function renderProducts() {
+    const q = $('searchInput').value.trim().toLowerCase();
+    const filtered = products.filter(p => `${p.name} ${p.category} ${p.origin || ''}`.toLowerCase().includes(q));
+    $('countLabel').textContent = `Всего: ${products.length} · опубликовано: ${products.filter(p=>p.is_published).length}`;
+    $('productList').innerHTML = filtered.length ? filtered.map(p => `
+      <article class="product">
+        <img src="${escapeHtml(p.image_url || '')}" alt="" onerror="this.style.visibility='hidden'">
+        <div><h3>${escapeHtml(p.name)}</h3><p>${escapeHtml(p.category)}${p.origin ? ' · '+escapeHtml(p.origin) : ''}</p><div class="price">${escapeHtml(money(p))}</div><p>${p.is_published ? 'Опубликован' : 'Скрыт'}</p></div>
+        <div class="item-actions"><button class="secondary small" data-edit="${p.id}">Изменить</button><button class="danger small" data-delete="${p.id}">Удалить</button></div>
+      </article>`).join('') : '<div class="panel muted">Товары не найдены.</div>';
+  }
+  function resetEditor() {
+    $('productForm').reset(); $('productId').value=''; $('unit').value='100 г'; $('currency').value='RUB';
+    $('published').checked=true; $('imagePreview').classList.add('hidden'); $('imagePreview').removeAttribute('src');
+    $('editorTitle').textContent='Новый товар'; $('formStatus').innerHTML='';
+  }
+  function openEditor(p=null) {
+    resetEditor();
+    if (p) {
+      $('editorTitle').textContent='Изменить товар';
+      $('productId').value=p.id; $('name').value=p.name || ''; $('category').value=p.category || '';
+      $('price').value=p.price; $('unit').value=p.unit || '100 г'; $('currency').value=p.currency || 'RUB';
+      $('origin').value=p.origin || ''; $('shortDescription').value=p.short_description || '';
+      $('description').value=p.description || ''; $('published').checked=!!p.is_published;
+      if (p.image_url) { $('imagePreview').src=p.image_url; $('imagePreview').classList.remove('hidden'); }
+    }
+    $('editor').classList.remove('hidden');
+    $('editor').scrollIntoView({behavior:'smooth',block:'start'});
+  }
+  $('forgotPasswordBtn').addEventListener('click', async () => {
+    const email = $('email').value.trim();
+    if (!email) { message($('loginStatus'), 'Сначала введи email владельца.', true); $('email').focus(); return; }
+    $('forgotPasswordBtn').disabled = true;
+    message($('loginStatus'), 'Отправляем письмо для смены пароля…');
+    const redirectTo = window.location.origin + window.location.pathname;
+    const { error } = await db.auth.resetPasswordForEmail(email, { redirectTo });
+    $('forgotPasswordBtn').disabled = false;
+    if (error) { message($('loginStatus'), error.message, true); return; }
+    message($('loginStatus'), 'Письмо отправлено. Открой его и перейди по ссылке — вернёшься сюда для задания нового пароля.');
+  });
+
+  $('recoveryForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const password = $('newPassword').value;
+    const confirmation = $('confirmPassword').value;
+    if (password.length < 10) { message($('recoveryStatus'), 'Пароль должен содержать не менее 10 символов.', true); return; }
+    if (password !== confirmation) { message($('recoveryStatus'), 'Пароли не совпадают.', true); return; }
+    $('recoverySaveBtn').disabled = true;
+    message($('recoveryStatus'), 'Сохраняем новый пароль…');
+    const { data: { user }, error: userError } = await db.auth.getUser();
+    if (userError || !user || user.id !== OWNER_UID) {
+      $('recoverySaveBtn').disabled = false;
+      message($('recoveryStatus'), 'Ссылка восстановления недействительна или относится не к владельцу.', true);
+      return;
+    }
+    const { error } = await db.auth.updateUser({ password });
+    $('recoverySaveBtn').disabled = false;
+    if (error) { message($('recoveryStatus'), error.message, true); return; }
+    await db.auth.signOut();
+    $('recoveryForm').reset();
+    $('recoveryPanel').classList.add('hidden');
+    showApp(false);
+    message($('loginStatus'), 'Пароль успешно изменён. Теперь войди с новым паролем.');
+    history.replaceState(null, '', window.location.pathname);
+  });
+
+  $('loginForm').addEventListener('submit', async e => {
+    e.preventDefault(); $('loginBtn').disabled=true; message($('loginStatus'),'Выполняется вход…');
+    const {data,error}=await db.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});
+    $('loginBtn').disabled=false;
+    if(error){message($('loginStatus'),error.message,true);return;}
+    if(data.user.id!==OWNER_UID){await db.auth.signOut();message($('loginStatus'),'У этой учётной записи нет доступа.',true);return;}
+    message($('loginStatus'),''); await verifySession();
+  });
+  $('logoutBtn').addEventListener('click', async()=>{await db.auth.signOut();showApp(false);});
+  $('newBtn').addEventListener('click',()=>openEditor());
+  $('cancelBtn').addEventListener('click',()=>{$('editor').classList.add('hidden');resetEditor();});
+  $('searchInput').addEventListener('input',renderProducts);
+  $('productList').addEventListener('click', async e=>{
+    const edit=e.target.closest('[data-edit]'); const del=e.target.closest('[data-delete]');
+    if(edit){const p=products.find(x=>x.id===edit.dataset.edit);if(p)openEditor(p);}
+    if(del){
+      const p=products.find(x=>x.id===del.dataset.delete); if(!p)return;
+      if(!confirm(`Удалить товар «${p.name}»? Это действие нельзя отменить.`))return;
+      del.disabled=true;
+      const {error}=await db.from('products').delete().eq('id',p.id);
+      if(error){alert(`Не удалось удалить товар: ${error.message}`);del.disabled=false;return;}
+      $('editor').classList.add('hidden'); await loadProducts();
+    }
+  });
+  $('imageFile').addEventListener('change',()=>{
+    const f=$('imageFile').files[0]; if(!f)return;
+    if(!['image/jpeg','image/png','image/webp'].includes(f.type)||f.size>5*1024*1024){alert('Выберите JPG, PNG или WebP до 5 МБ.');$('imageFile').value='';return;}
+    $('imagePreview').src=URL.createObjectURL(f);$('imagePreview').classList.remove('hidden');
+  });
+  $('productForm').addEventListener('submit',async e=>{
+    e.preventDefault(); const btn=$('saveBtn'); btn.disabled=true; message($('formStatus'),'Сохраняем товар…');
+    try {
+      const id=$('productId').value;
+      const payload={
+        name:$('name').value.trim(), category:$('category').value.trim(),
+        price:Number($('price').value), unit:$('unit').value.trim(),
+        currency:$('currency').value, origin:$('origin').value.trim()||null,
+        short_description:$('shortDescription').value.trim()||null,
+        description:$('description').value.trim()||null,
+        is_published:$('published').checked, updated_at:new Date().toISOString()
+      };
+      const file=$('imageFile').files[0];
+      if(file){
+        const ext=file.type==='image/png'?'png':file.type==='image/webp'?'webp':'jpg';
+        const path=`products/${crypto.randomUUID()}.${ext}`;
+        const {error:uploadError}=await db.storage.from('product-images').upload(path,file,{contentType:file.type,upsert:false});
+        if(uploadError)throw uploadError;
+        const {data:{publicUrl}}=db.storage.from('product-images').getPublicUrl(path);
+        payload.image_url=publicUrl;
+      }
+      let result;
+      if(id) result=await db.from('products').update(payload).eq('id',id);
+      else {payload.sort_order=products.length ? Math.max(...products.map(p=>Number(p.sort_order)||0))+1 : 0;result=await db.from('products').insert(payload);}
+      if(result.error)throw result.error;
+      $('editor').classList.add('hidden');resetEditor();await loadProducts();
+      message($('listStatus'),'Товар успешно сохранён.');
+      window.scrollTo({top:0,behavior:'smooth'});
+    } catch(err) { message($('formStatus'),err.message||'Неизвестная ошибка',true); }
+    finally { btn.disabled=false; }
+  });
+  db.auth.onAuthStateChange((event, session) => {
+    if (event === 'PASSWORD_RECOVERY') {
+      if (session && session.user && session.user.id === OWNER_UID) showRecovery(true);
+      else { showRecovery(false); message($('loginStatus'), 'Ссылка восстановления относится не к владельцу.', true); }
+    }
+  });
+  (async () => {
+    // Supabase JS exchanges the recovery tokens from the URL fragment during initialization.
+    await new Promise(resolve => setTimeout(resolve, 250));
+    const { data: { session } } = await db.auth.getSession();
+    const recoveryLink = location.hash.includes('type=recovery') || new URLSearchParams(location.search).get('type') === 'recovery';
+    if (recoveryLink && session && session.user.id === OWNER_UID) showRecovery(true);
+    else await verifySession();
+  })();
+})();
+</script>
+
+<script>
+(() => {
+  const installButton = document.getElementById('installBtn');
+  let installPrompt = null;
+
+  window.addEventListener('beforeinstallprompt', event => {
+    event.preventDefault();
+    installPrompt = event;
+    if (installButton) installButton.style.display = 'inline-flex';
+  });
+
+  installButton?.addEventListener('click', async () => {
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    await installPrompt.userChoice;
+    installPrompt = null;
+    installButton.style.display = 'none';
+  });
+
+  window.addEventListener('appinstalled', () => {
+    if (installButton) installButton.style.display = 'none';
+    installPrompt = null;
+  });
+
+  if ('serviceWorker' in navigator && location.protocol === 'https:') {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js', { scope: './' })
+        .catch(error => console.error('Не удалось зарегистрировать Service Worker:', error));
+    });
+  }
+})();
+</script>
+
+</body>
+</html>

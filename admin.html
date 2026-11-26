@@ -62,6 +62,7 @@
     </section>
 
     <section id="appPanel" class="hidden">
+      <div id="listPanel">
       <div class="panel">
         <div class="toolbar" style="justify-content:space-between">
           <div><h2 style="margin:0 0 4px">Товары</h2><div class="muted" id="countLabel">Загрузка…</div></div>
@@ -74,6 +75,7 @@
       </div>
       <div id="listStatus" aria-live="polite"></div>
       <div id="productList" class="products"></div>
+      </div>
       <section id="editor" class="panel hidden" style="margin-top:16px">
         <h2 id="editorTitle">Новый товар</h2>
         <form id="productForm">
@@ -145,7 +147,7 @@
   }
   async function loadProducts() {
     message($('listStatus'), 'Загружаем товары…');
-    const {data, error} = await db.from('products').select('*').order('sort_order', {ascending:true}).order('created_at', {ascending:false});
+    const {data, error} = await db.from('products').select('*').order('created_at', {ascending:false, nullsFirst:false}).order('sort_order', {ascending:true});
     if (error) { message($('listStatus'), `Не удалось загрузить товары: ${error.message}`, true); return; }
     products = data || [];
     renderProducts();
@@ -177,8 +179,9 @@
       $('description').value=p.description || ''; $('published').checked=!!p.is_published;
       if (p.image_url) { $('imagePreview').src=p.image_url; $('imagePreview').classList.remove('hidden'); }
     }
+    $('listPanel').classList.add('hidden');
     $('editor').classList.remove('hidden');
-    $('editor').scrollIntoView({behavior:'smooth',block:'start'});
+    window.scrollTo({top:0,behavior:'smooth'});
   }
   $('forgotPasswordBtn').addEventListener('click', async () => {
     const email = $('email').value.trim();
@@ -227,7 +230,12 @@
   });
   $('logoutBtn').addEventListener('click', async()=>{await db.auth.signOut();showApp(false);});
   $('newBtn').addEventListener('click',()=>openEditor());
-  $('cancelBtn').addEventListener('click',()=>{$('editor').classList.add('hidden');resetEditor();});
+  $('cancelBtn').addEventListener('click',()=>{
+    $('editor').classList.add('hidden');
+    resetEditor();
+    $('listPanel').classList.remove('hidden');
+    window.scrollTo({top:0,behavior:'smooth'});
+  });
   $('searchInput').addEventListener('input',renderProducts);
   $('productList').addEventListener('click', async e=>{
     const edit=e.target.closest('[data-edit]'); const del=e.target.closest('[data-delete]');
@@ -246,8 +254,59 @@
     if(!['image/jpeg','image/png','image/webp'].includes(f.type)||f.size>5*1024*1024){alert('Выберите JPG, PNG или WebP до 5 МБ.');$('imageFile').value='';return;}
     $('imagePreview').src=URL.createObjectURL(f);$('imagePreview').classList.remove('hidden');
   });
+  async function compressImage(file) {
+    const maxSide = 1600;
+    let bitmap;
+    try {
+      if ('createImageBitmap' in window) {
+        bitmap = await createImageBitmap(file);
+      } else {
+        bitmap = await new Promise((resolve, reject) => {
+          const url = URL.createObjectURL(file);
+          const img = new Image();
+          img.onload = () => { URL.revokeObjectURL(url); resolve(img); };
+          img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Не удалось прочитать изображение.')); };
+          img.src = url;
+        });
+      }
+      const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+      canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+      const ctx = canvas.getContext('2d');
+      if (!ctx) throw new Error('Браузер не смог обработать изображение.');
+      ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+      const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/webp', 0.84));
+      if (!blob) throw new Error('Не удалось сжать изображение.');
+      return new File([blob], `${file.name.replace(/\.[^.]+$/, '')}.webp`, {type:'image/webp', lastModified:Date.now()});
+    } finally {
+      if (bitmap && typeof bitmap.close === 'function') bitmap.close();
+    }
+  }
+
+  function storagePathFromPublicUrl(url) {
+    if (!url) return null;
+    const marker = '/storage/v1/object/public/product-images/';
+    const index = url.indexOf(marker);
+    if (index < 0) return null;
+    try {
+      const path = decodeURIComponent(url.slice(index + marker.length).split('?')[0]);
+      return path.startsWith('products/') ? path : null;
+    } catch {
+      return null;
+    }
+  }
+
   $('productForm').addEventListener('submit',async e=>{
-    e.preventDefault(); const btn=$('saveBtn'); btn.disabled=true; message($('formStatus'),'Сохраняем товар…');
+    e.preventDefault();
+    const btn=$('saveBtn');
+    btn.disabled=true;
+    let stage='проверка данных';
+    let uploadedPath=null;
+    let saved=false;
+    const existing=products.find(p=>p.id===$('productId').value);
+    const oldImageUrl=existing?.image_url || null;
+    message($('formStatus'),'Сохраняем товар…');
     try {
       const id=$('productId').value;
       const payload={
@@ -260,22 +319,60 @@
       };
       const file=$('imageFile').files[0];
       if(file){
-        const ext=file.type==='image/png'?'png':file.type==='image/webp'?'webp':'jpg';
-        const path=`products/${crypto.randomUUID()}.${ext}`;
-        const {error:uploadError}=await db.storage.from('product-images').upload(path,file,{contentType:file.type,upsert:false});
-        if(uploadError)throw uploadError;
+        stage='сжатие фотографии';
+        const optimized=await compressImage(file);
+        stage='загрузка фотографии';
+        const path=`products/${crypto.randomUUID()}.webp`;
+        const {error:uploadError}=await db.storage.from('product-images').upload(path,optimized,{contentType:'image/webp',upsert:false});
+        if(uploadError) throw uploadError;
+        uploadedPath=path;
         const {data:{publicUrl}}=db.storage.from('product-images').getPublicUrl(path);
         payload.image_url=publicUrl;
       }
+
+      stage='сохранение данных товара';
       let result;
       if(id) result=await db.from('products').update(payload).eq('id',id);
-      else {payload.sort_order=products.length ? Math.max(...products.map(p=>Number(p.sort_order)||0))+1 : 0;result=await db.from('products').insert(payload);}
-      if(result.error)throw result.error;
-      $('editor').classList.add('hidden');resetEditor();await loadProducts();
+      else {
+        payload.sort_order=products.length ? Math.max(...products.map(p=>Number(p.sort_order)||0))+1 : 0;
+        payload.created_at=new Date().toISOString();
+        result=await db.from('products').insert(payload);
+      }
+      if(result.error) throw result.error;
+      saved=true;
+
+      // Remove the previous image only after the database points to the new one.
+      if(file && oldImageUrl){
+        const oldPath=storagePathFromPublicUrl(oldImageUrl);
+        if(oldPath && oldPath!==uploadedPath){
+          const {error:removeError}=await db.storage.from('product-images').remove([oldPath]);
+          if(removeError) console.warn('Старое фото не удалось удалить из Storage:',removeError);
+        }
+      }
+
+      $('editor').classList.add('hidden');
+      resetEditor();
+      $('listPanel').classList.remove('hidden');
+      await loadProducts();
       message($('listStatus'),'Товар успешно сохранён.');
       window.scrollTo({top:0,behavior:'smooth'});
-    } catch(err) { message($('formStatus'),err.message||'Неизвестная ошибка',true); }
-    finally { btn.disabled=false; }
+    } catch(err) {
+      if(uploadedPath && !saved){
+        const {error:cleanupError}=await db.storage.from('product-images').remove([uploadedPath]);
+        if(cleanupError) console.warn('Не удалось удалить неиспользуемое загруженное фото:',cleanupError);
+      }
+      const detail=err?.message || 'Неизвестная ошибка';
+      const prefix=stage==='загрузка фотографии'
+        ? 'Не удалось загрузить фотографию'
+        : stage==='сжатие фотографии'
+          ? 'Не удалось обработать фотографию'
+          : stage==='сохранение данных товара'
+            ? 'Фотография могла загрузиться, но данные товара не сохранились'
+            : 'Не удалось сохранить товар';
+      message($('formStatus'),`${prefix}: ${detail}`,true);
+    } finally {
+      btn.disabled=false;
+    }
   });
   db.auth.onAuthStateChange((event, session) => {
     if (event === 'PASSWORD_RECOVERY') {
