@@ -41,6 +41,18 @@
         <div class="actions"><button class="primary" id="loginBtn" type="submit">Войти</button></div>
       </form>
       <div id="loginStatus" aria-live="polite"></div>
+      <button class="secondary" id="forgotPasswordBtn" type="button">Забыли пароль?</button>
+    </section>
+
+    <section id="recoveryPanel" class="panel hidden">
+      <h2>Задать новый пароль</h2>
+      <p class="muted">Введите новый пароль для учётной записи владельца.</p>
+      <form id="recoveryForm">
+        <label for="newPassword">Новый пароль</label><input id="newPassword" type="password" autocomplete="new-password" minlength="10" required>
+        <label for="confirmPassword">Повторите пароль</label><input id="confirmPassword" type="password" autocomplete="new-password" minlength="10" required>
+        <div class="actions"><button class="primary" id="recoverySaveBtn" type="submit">Сохранить пароль</button></div>
+      </form>
+      <div id="recoveryStatus" aria-live="polite"></div>
     </section>
 
     <section id="appPanel" class="hidden">
@@ -107,6 +119,11 @@
     $('loginPanel').classList.toggle('hidden', on);
     $('appPanel').classList.toggle('hidden', !on);
   }
+  function showRecovery(on) {
+    $('loginPanel').classList.toggle('hidden', on);
+    $('appPanel').classList.add('hidden');
+    $('recoveryPanel').classList.toggle('hidden', !on);
+  }
   async function verifySession() {
     const {data:{session}} = await db.auth.getSession();
     if (!session) { showApp(false); return; }
@@ -157,6 +174,43 @@
     $('editor').classList.remove('hidden');
     $('editor').scrollIntoView({behavior:'smooth',block:'start'});
   }
+  $('forgotPasswordBtn').addEventListener('click', async () => {
+    const email = $('email').value.trim();
+    if (!email) { message($('loginStatus'), 'Сначала введи email владельца.', true); $('email').focus(); return; }
+    $('forgotPasswordBtn').disabled = true;
+    message($('loginStatus'), 'Отправляем письмо для смены пароля…');
+    const redirectTo = window.location.origin + window.location.pathname;
+    const { error } = await db.auth.resetPasswordForEmail(email, { redirectTo });
+    $('forgotPasswordBtn').disabled = false;
+    if (error) { message($('loginStatus'), error.message, true); return; }
+    message($('loginStatus'), 'Письмо отправлено. Открой его и перейди по ссылке — вернёшься сюда для задания нового пароля.');
+  });
+
+  $('recoveryForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const password = $('newPassword').value;
+    const confirmation = $('confirmPassword').value;
+    if (password.length < 10) { message($('recoveryStatus'), 'Пароль должен содержать не менее 10 символов.', true); return; }
+    if (password !== confirmation) { message($('recoveryStatus'), 'Пароли не совпадают.', true); return; }
+    $('recoverySaveBtn').disabled = true;
+    message($('recoveryStatus'), 'Сохраняем новый пароль…');
+    const { data: { user }, error: userError } = await db.auth.getUser();
+    if (userError || !user || user.id !== OWNER_UID) {
+      $('recoverySaveBtn').disabled = false;
+      message($('recoveryStatus'), 'Ссылка восстановления недействительна или относится не к владельцу.', true);
+      return;
+    }
+    const { error } = await db.auth.updateUser({ password });
+    $('recoverySaveBtn').disabled = false;
+    if (error) { message($('recoveryStatus'), error.message, true); return; }
+    await db.auth.signOut();
+    $('recoveryForm').reset();
+    $('recoveryPanel').classList.add('hidden');
+    showApp(false);
+    message($('loginStatus'), 'Пароль успешно изменён. Теперь войди с новым паролем.');
+    history.replaceState(null, '', window.location.pathname);
+  });
+
   $('loginForm').addEventListener('submit', async e => {
     e.preventDefault(); $('loginBtn').disabled=true; message($('loginStatus'),'Выполняется вход…');
     const {data,error}=await db.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});
@@ -217,8 +271,20 @@
     } catch(err) { message($('formStatus'),err.message||'Неизвестная ошибка',true); }
     finally { btn.disabled=false; }
   });
-  db.auth.onAuthStateChange((_event)=>{});
-  verifySession();
+  db.auth.onAuthStateChange((event, session) => {
+    if (event === 'PASSWORD_RECOVERY') {
+      if (session && session.user && session.user.id === OWNER_UID) showRecovery(true);
+      else { showRecovery(false); message($('loginStatus'), 'Ссылка восстановления относится не к владельцу.', true); }
+    }
+  });
+  (async () => {
+    // Supabase JS exchanges the recovery tokens from the URL fragment during initialization.
+    await new Promise(resolve => setTimeout(resolve, 250));
+    const { data: { session } } = await db.auth.getSession();
+    const recoveryLink = location.hash.includes('type=recovery') || new URLSearchParams(location.search).get('type') === 'recovery';
+    if (recoveryLink && session && session.user.id === OWNER_UID) showRecovery(true);
+    else await verifySession();
+  })();
 })();
 </script>
 </body>
