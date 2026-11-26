@@ -620,7 +620,12 @@ footer {
 </section>
 <footer>Чёрная треска · Рыба и морепродукты</footer>
 </main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+const SUPABASE_URL = "https://fzxjhxphqhmiusyshfrd.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_3oAm9NcSbWmBVFuhOumtxg_ul-q58Gz";
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+
 const productsContainer=document.getElementById("products");
 const filtersContainer=document.getElementById("filters");
 const searchForm=document.getElementById("searchForm");
@@ -790,13 +795,44 @@ tgBackButton.onClick(()=>{
   showCatalog();
 });
 async function loadProducts(){
- try{
-  const response=await fetch("./products.json");if(!response.ok)throw new Error("Не удалось загрузить каталог");
-  products=await response.json();createFilters();showProducts();
- }catch(error){
-  productsContainer.innerHTML='<div class="status">Не удалось загрузить ассортимент. Проверьте products.json и обновите страницу.</div>';
-  console.error(error);
- }
+  productsContainer.innerHTML='<div class="status">Загружаем ассортимент…</div>';
+
+  try {
+    const { data, error } = await supabaseClient
+      .from("products")
+      .select("*")
+      .eq("is_published", true)
+      .order("sort_order", { ascending: true })
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+
+    // Преобразуем поля базы данных в формат, который использует интерфейс.
+    products = (data || []).map(product => ({
+      id: product.id,
+      name: product.name,
+      category: product.category,
+      description: product.description || "",
+      shortDescription: product.short_description || product.description || "",
+      origin: product.origin || "",
+      price: Number(product.price),
+      unit: product.unit || "100 г",
+      image: product.image_url || "",
+      usage: Array.isArray(product.usage) ? product.usage : []
+    }));
+
+    createFilters();
+    showProducts();
+
+    if (!products.length) {
+      productsContainer.innerHTML =
+        '<div class="status">В базе пока нет опубликованных товаров. На следующем этапе перенесём сюда существующий ассортимент.</div>';
+    }
+  } catch(error) {
+    productsContainer.innerHTML =
+      '<div class="status">Не удалось загрузить ассортимент из базы. Проверьте подключение и политики доступа.</div>';
+    console.error("Supabase products error:", error);
+  }
 }
 loadProducts();
 if(window.Telegram?.WebApp){Telegram.WebApp.ready();Telegram.WebApp.expand();}
